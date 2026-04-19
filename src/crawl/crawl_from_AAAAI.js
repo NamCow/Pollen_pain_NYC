@@ -12,8 +12,8 @@ async function gql(query, variables = {}, retry = 3) {
       });
       return r.json();
     } catch(e) {
-      console.log(`  ⚠️ Lỗi mạng, thử lại ${i+1}/${retry}...`);
-      await new Promise(res => setTimeout(res, 2000 * (i+1))); // chờ 2s, 4s, 6s
+      console.log(`  ⚠️ Network error, retrying ${i+1}/${retry}...`);
+      await new Promise(res => setTimeout(res, 2000 * (i+1))); // Wait 2s, 4s, 6s
     }
   }
   return null;
@@ -47,11 +47,11 @@ async function fetchDetail(id) {
   return r?.data?.allergenCollectionSet;
 }
 
-// Lưu tạm vào localStorage để không mất khi lỗi
+// Save temporarily to localStorage so data is not lost on errors.
 const CACHE_KEY = "pollen_rows";
 let rows = JSON.parse(localStorage.getItem(CACHE_KEY) || "[]");
 const done = new Set(rows.map(r => r.date));
-console.log(`📦 Đã có sẵn ${rows.length} ngày trong cache`);
+console.log(`📦 Already have ${rows.length} days in cache`);
 
 const YEARS  = [2022, 2023, 2024, 2025];
 const MONTHS = [3, 4, 5, 6, 7, 8, 9, 10];
@@ -59,8 +59,8 @@ const MONTHS = [3, 4, 5, 6, 7, 8, 9, 10];
 for (const year of YEARS) {
   for (const month of MONTHS) {
     const days = await fetchIds(year, month);
-    const todo = days.filter(d => !done.has(d.date)); // bỏ qua ngày đã có
-    console.log(`📅 ${year}/${month}: ${days.length} ngày | cần lấy: ${todo.length}`);
+    const todo = days.filter(d => !done.has(d.date)); // Skip days already collected
+    console.log(`📅 ${year}/${month}: ${days.length} days | need to fetch: ${todo.length}`);
 
     for (let i = 0; i < todo.length; i++) {
       const detail = await fetchDetail(todo[i].id);
@@ -74,10 +74,10 @@ for (const year of YEARS) {
       rows.push(row);
       done.add(detail.date);
 
-      // Lưu cache mỗi 10 ngày
+      // Save cache every 10 days
       if (i % 10 === 0) {
         localStorage.setItem(CACHE_KEY, JSON.stringify(rows));
-        console.log(`  💾 Saved cache: ${rows.length} ngày`);
+        console.log(`  💾 Saved cache: ${rows.length} days`);
       }
       await new Promise(res => setTimeout(res, 150));
     }
@@ -86,7 +86,7 @@ for (const year of YEARS) {
 
 localStorage.setItem(CACHE_KEY, JSON.stringify(rows));
 
-// Tổng hợp theo tháng
+// Aggregate by month
 const monthly = {};
 for (const row of rows) {
   const key = `${row.year}-${String(row.month).padStart(2,"0")}`;

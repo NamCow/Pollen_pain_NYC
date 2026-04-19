@@ -31,7 +31,7 @@ def normalize_historic_response(raw, zip_code: str) -> pd.DataFrame:
 
         return pd.DataFrame([raw]).assign(zip_code=zip_code)
 
-    # Trường hợp list records
+    # List-records case
     if isinstance(raw, list):
         df = pd.DataFrame(raw)
         df["zip_code"] = zip_code

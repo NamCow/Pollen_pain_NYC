@@ -77,7 +77,7 @@ def get_airnow_nyc_monthly_2025() -> pd.DataFrame:
 
     df = pd.concat(all_rows, ignore_index=True)
 
-    # In đơn vị để verify
+    # Print units for verification.
     print("\nUnits found in AirNow data:")
     print(df.groupby(['param', 'unit']).size().to_string())
 
