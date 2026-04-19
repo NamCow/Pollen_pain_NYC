@@ -3,7 +3,7 @@ import pandas as pd
 from pathlib import Path
 
 SOCRATA_ENDPOINT = "https://data.cityofnewyork.us/resource/erm2-nwe9.json"
-OUTPUT_CSV = "./data/raw/311_air_quality.csv"
+OUTPUT_CSV = "./data/raw/nyc311_air_quality_complaints.csv"
 PAGE_SIZE = 50_000
 
 COLUMNS = (

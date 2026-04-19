@@ -19,7 +19,7 @@ import pandas as pd
 from pathlib import Path
 
 EHDP_BASE = "https://raw.githubusercontent.com/nychealth/EHDP-data/production/indicators/data"
-OUTPUT_CSV = Path("./data/raw/chs_respiratory_uhf42.csv")
+OUTPUT_CSV = Path("./data/raw/dohmh_chs_respiratory_annual_uhf42.csv")
 
 TIMEPERIOD_MAP = {
     7: "2003", 8: "2004", 9: "2005", 10: "2006", 11: "2007", 12: "2008",

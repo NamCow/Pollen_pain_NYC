@@ -13,7 +13,7 @@ import pandas as pd
 from pathlib import Path
 
 SOCRATA_URL = "https://data.cityofnewyork.us/resource/uvpi-gqnh.json"
-OUTPUT_CSV = Path("./data/raw/street_tree_census_2015.csv")
+OUTPUT_CSV = Path("./data/raw/nyc_street_tree_census_2015.csv")
 
 COLUMNS = [
     "tree_id", "tree_dbh", "status", "health",
