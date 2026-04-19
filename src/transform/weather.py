@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 def main():
-    input_path = Path("./data/raw/weather_daily_by_nta.csv")
+    input_path = Path("./data/raw/openmeteo_weather_daily_by_nta.csv")
     output_path = Path("./data/processed/weather_monthly_nyc.csv")
 
     df = pd.read_csv(input_path)

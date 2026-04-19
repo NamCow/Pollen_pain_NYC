@@ -24,8 +24,8 @@ from pathlib import Path
 EHDP_BASE = "https://raw.githubusercontent.com/nychealth/EHDP-data/production/indicators/data"
 
 OUTPUT_DIR = Path("./data/raw")
-OUTPUT_UHF = OUTPUT_DIR / "asthma_ed_visits_uhf42.csv"
-OUTPUT_NTA = OUTPUT_DIR / "asthma_ed_visits_nta2020.csv"
+OUTPUT_UHF = OUTPUT_DIR / "dohmh_asthma_ed_annual_uhf42.csv"
+OUTPUT_NTA = OUTPUT_DIR / "dohmh_asthma_ed_annual_nta2020.csv"
 
 TIMEPERIOD_MAP = {
     9: "2005", 10: "2006", 11: "2007", 12: "2008", 13: "2009", 14: "2010",
