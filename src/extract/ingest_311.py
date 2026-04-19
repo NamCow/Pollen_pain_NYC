@@ -45,7 +45,7 @@ def fetch_all() -> pd.DataFrame:
 
 
 def main():
-    print("Fetching NYC 311 Air Quality complaints (2019-2024)...")
+    print("Fetching NYC 311 Air Quality complaints...")
     df = fetch_all()
     if df.empty:
         print("No data returned.")
