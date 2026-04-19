@@ -1,0 +1,25 @@
+=== EVALUATION SUMMARY ===
+Total rows: 4,416  NTAs: 184  Months: 24
+Modeling window: 2022-03 to 2024-10
+
+--- XGBoost Regression (walk-forward CV) ---
+Mean MAE:  2.01
+Mean RMSE: 3.20
+Mean Pearson r: 0.960
+Mean NTAs within 15%: 91.6%
+
+--- Logistic Regression Baseline ---
+Mean AUC-ROC: 0.981
+Mean Accuracy: 95.61%
+
+--- Feature Importance (top 10) ---
+  chs_asthma_pct                 0.7471
+  temp_min_mean                  0.0459
+  pollen_14d_lag_avg             0.0283
+  pm25_mean                      0.0276
+  temp_max_mean                  0.0227
+  pollen_composite_avg           0.0217
+  total_dbh                      0.0207
+  no2_mean                       0.0167
+  wind_max_mean                  0.0138
+  tree_avg                       0.0111
