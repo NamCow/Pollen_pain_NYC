@@ -56,11 +56,11 @@ from pyiqvia import Client
 
 #     periods = None
 
-#     # Case 1: periods ở top-level
+#     # Case 1: periods at the top level
 #     if isinstance(raw.get("periods"), list):
 #         periods = raw["periods"]
 
-#     # Case 2/3: periods nằm trong Location
+#     # Case 2/3: periods nested in Location
 #     elif "Location" in raw:
 #         location = raw["Location"]
 

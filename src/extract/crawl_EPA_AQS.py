@@ -14,7 +14,7 @@ def get_epa_nyc_monthly(pollutant_code, years=[2022, 2023, 2024]):
         response = requests.get(url)
         response.raise_for_status()
 
-        # Mở ZIP, tìm file .csv bên trong (bỏ qua folder)
+        # Open the ZIP and find the CSV file inside, ignoring folders.
         with zipfile.ZipFile(io.BytesIO(response.content)) as z:
             csv_files = [f for f in z.namelist() if f.endswith('.csv')]
             with z.open(csv_files[0]) as f:
