@@ -12,8 +12,8 @@ COLUMNS = (
 )
 WHERE = (
     "complaint_type='Air Quality' "
-    "AND created_date >= '2019-01-01T00:00:00' "
-    "AND created_date <= '2024-12-31T23:59:59'"
+    "AND created_date >= '2022-03-01T00:00:00' "
+    "AND created_date <= '2025-11-01T23:59:59'"
 )
 
 

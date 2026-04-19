@@ -6,8 +6,8 @@ from pathlib import Path
 
 NTA_BOUNDARY_PATH = "./data/Input/nynta2020.shp"
 OUTPUT_CSV = "./data/raw/weather_daily_by_nta.csv"
-START_DATE = "2019-01-01"
-END_DATE = "2024-12-31"
+START_DATE = "2022-01-01"
+END_DATE = "2025-12-31"
 
 OPEN_METEO_URL = "https://archive-api.open-meteo.com/v1/archive"
 DAILY_VARS = "temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max"
