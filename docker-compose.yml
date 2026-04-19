@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: pollen_pain_postgres
+    environment:
+      POSTGRES_DB: pollen_pain
+      POSTGRES_USER: pollen
+      POSTGRES_PASSWORD: pollen123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/postgres/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+
+  mongo:
+    image: mongo:7
+    container_name: pollen_pain_mongo
+    environment:
+      MONGO_INITDB_DATABASE: pollen_pain
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  postgres_data:
+  mongo_data:
