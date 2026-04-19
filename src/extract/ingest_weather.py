@@ -5,7 +5,7 @@ import geopandas as gpd
 from pathlib import Path
 
 NTA_BOUNDARY_PATH = "./data/Input/nynta2020.shp"
-OUTPUT_CSV = "./data/raw/weather_daily_by_nta.csv"
+OUTPUT_CSV = "./data/raw/openmeteo_weather_daily_by_nta.csv"
 START_DATE = "2022-01-01"
 END_DATE = "2025-12-31"
 
