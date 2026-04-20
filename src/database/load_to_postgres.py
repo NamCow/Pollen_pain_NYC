@@ -14,7 +14,20 @@ from psycopg2.extras import execute_values
 from pathlib import Path
 
 PROCESSED = Path("./data/processed")
-DB_PARAMS = dict(dbname="pollen_pain", host="localhost", port=5432)
+import os
+from dotenv import load_dotenv
+
+# Try to load .env from the parent directory
+load_dotenv(Path(__file__).parent.parent.parent.parent / ".env")
+
+DB_PARAMS = dict(
+    dbname=os.environ.get("DB_NAME", "postgres"),
+    user=os.environ.get("DB_USER", "postgres"),
+    password=os.environ.get("DB_PASSWORD", ""),
+    host=os.environ.get("DB_HOST", "localhost"),
+    port=int(os.environ.get("DB_PORT", 5432)),
+    sslmode="require",
+)
 
 
 def load_df(cur, table: str, df: pd.DataFrame):

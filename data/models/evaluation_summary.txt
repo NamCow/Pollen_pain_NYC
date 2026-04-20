@@ -3,23 +3,23 @@ Total rows: 6,304  NTAs: 197  Months: 32
 Modeling window: 2022-03 to 2025-10
 
 --- XGBoost Regression (walk-forward CV) ---
-Mean MAE:  2.33
-Mean RMSE: 3.25
-Mean Pearson r: 0.955
-Mean NTAs within 15%: 86.8%
+Mean MAE:  2.56
+Mean RMSE: 3.58
+Mean Pearson r: 0.952
+Mean NTAs within 15%: 83.0%
 
 --- Logistic Regression Baseline ---
-Mean AUC-ROC: 0.963
-Mean Accuracy: 75.55%
+Mean AUC-ROC: 0.916
+Mean Accuracy: 76.25%
 
 --- Feature Importance (top 10) ---
-  chs_asthma_pct                 0.6850
-  pollen_28d_lag_avg             0.0490
-  temp_min_mean                  0.0478
-  temp_max_mean                  0.0275
-  total_dbh                      0.0271
-  pollen_14d_lag_avg             0.0248
-  pollen_composite_avg           0.0189
-  pm25_mean                      0.0180
-  tree_avg                       0.0174
-  no2_mean                       0.0168
+  chs_asthma_pct                 0.6899
+  temp_min_mean                  0.0410
+  pollen_28d_lag_avg             0.0383
+  mean_dbh                       0.0325
+  total_dbh                      0.0312
+  pct_good_health                0.0212
+  temp_max_mean                  0.0199
+  pm25_mean                      0.0195
+  pollen_14d_lag_avg             0.0163
+  no2_mean                       0.0156
