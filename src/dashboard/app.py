@@ -152,7 +152,20 @@ footer { visibility: hidden; }
 
 # ── Database connection ──────────────────────────────────────────────────────
 
-DB_PARAMS = dict(dbname="pollen_pain", host="localhost", port=5432)
+import os
+from dotenv import load_dotenv
+
+# Load .env securely
+load_dotenv(Path(__file__).parent.parent.parent / ".env")
+
+DB_PARAMS = dict(
+    dbname=os.environ.get("DB_NAME", "pollen_pain"),
+    user=os.environ.get("DB_USER", "postgres"),
+    password=os.environ.get("DB_PASSWORD", ""),
+    host=os.environ.get("DB_HOST", "localhost"),
+    port=int(os.environ.get("DB_PORT", 5432)),
+    sslmode="require" if os.environ.get("DB_HOST") != "localhost" else "prefer",
+)
 GEOJSON_PATH = Path("./data/Input/nta2020.geojson")
 
 
