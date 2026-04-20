@@ -1,38 +1,76 @@
 """
-Standalone Logistic Regression baseline for classifying high vs low
-monthly asthma ED visits per NTA.
+Logistic Regression baseline for predicting above-median asthma ED visit months per NTA.
 
-Label: ed_high = 1 if ed_visits >= median, else 0.
-CV:    Walk-forward time-series splits (no random k-fold).
+Walk-forward time-series CV: train on earlier months, test on later months.
 
 Input:  data/processed/modeling_table.csv
-Output: data/models/logreg_predictions.csv
-        data/models/logreg_fold_results.csv
-        data/models/logreg_summary.txt
+Output: data/models/logistic_regression_predictions.csv
+        data/models/logistic_regression_coefficients.csv
+        data/models/logistic_regression_fold_results.csv
+        data/models/logistic_regression_summary.txt
 """
 
 import numpy as np
 import pandas as pd
 from pathlib import Path
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import roc_auc_score, accuracy_score, classification_report
-
-from src.features.feature_engineering import (
-    FEATURE_COLS, TARGET, walk_forward_splits, standard_scale, load_modeling_table,
+from sklearn.metrics import (
+    roc_auc_score,
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    classification_report,
 )
 
+INPUT = Path("./data/processed/modeling_table.csv")
 OUTPUT_DIR = Path("./data/models")
+
+FEATURE_COLS = [
+    "temp_max_mean", "temp_min_mean", "precip_total", "wind_max_mean",
+    "pollen_composite_avg", "pollen_composite_max",
+    "tree_avg", "tree_max", "weed_avg", "grass_avg",
+    "pollen_14d_lag_avg", "pollen_28d_lag_avg",
+    "pm25_mean", "ozone_mean", "no2_mean",
+    "tree_count", "total_dbh", "mean_dbh", "pct_good_health",
+    "chs_asthma_pct",
+]
+
+TARGET = "ed_visits"
+
+
+def walk_forward_splits(df: pd.DataFrame, n_test_months: int = 6):
+    months = sorted(df["year_month"].unique())
+    total = len(months)
+    min_train = 12
+
+    for i in range(min_train, total, n_test_months):
+        test_end = min(i + n_test_months, total)
+        train_months = months[:i]
+        test_months = months[i:test_end]
+
+        if len(test_months) == 0:
+            break
+
+        train = df[df["year_month"].isin(train_months)]
+        test = df[df["year_month"].isin(test_months)]
+        yield train, test, train_months[-1], test_months[0], test_months[-1]
 
 
 def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     print("Loading data...")
-    df = load_modeling_table()
+    df = pd.read_csv(INPUT)
+    df = df.dropna(subset=["pollen_composite_avg", "temp_max_mean"])
+    df = df[["nta_code", "NTAName", "borough", "year_month", TARGET] + FEATURE_COLS].copy()
+    print(f"  {len(df):,} rows, {df['nta_code'].nunique()} NTAs, {df['year_month'].nunique()} months")
+    print(f"  Date range: {df['year_month'].min()} to {df['year_month'].max()}")
+
     median_target = df[TARGET].median()
     df["ed_high"] = (df[TARGET] >= median_target).astype(int)
-    print(f"  {len(df):,} rows | {df['nta_code'].nunique()} NTAs | {df['year_month'].nunique()} months")
-    print(f"  Positive class rate: {df['ed_high'].mean():.2%}")
+    print(f"  Target median: {median_target:.2f}")
+    print(f"  High class balance: {df['ed_high'].mean():.2%}")
 
     print("\n=== Walk-Forward Cross-Validation ===")
     all_preds = []
@@ -43,61 +81,104 @@ def main():
     ):
         X_train = train[FEATURE_COLS]
         y_train = train["ed_high"]
-        X_test  = test[FEATURE_COLS]
-        y_test  = test["ed_high"]
+        X_test = test[FEATURE_COLS]
+        y_test = test["ed_high"]
 
-        X_train_s, X_test_s = standard_scale(X_train, X_test)
+        train_mean = X_train.mean()
+        train_std = X_train.std() + 1e-8
+        X_train_scaled = (X_train.fillna(train_mean) - train_mean) / train_std
+        X_test_scaled = (X_test.fillna(train_mean) - train_mean) / train_std
 
-        lr = LogisticRegression(max_iter=1000, random_state=42, C=1.0)
-        lr.fit(X_train_s, y_train)
+        model = LogisticRegression(max_iter=1000, random_state=42)
+        model.fit(X_train_scaled, y_train)
 
-        probs = lr.predict_proba(X_test_s)[:, 1]
-        preds = lr.predict(X_test_s)
+        probs = model.predict_proba(X_test_scaled)[:, 1]
+        preds = model.predict(X_test_scaled)
 
         auc = roc_auc_score(y_test, probs) if y_test.nunique() > 1 else float("nan")
         acc = accuracy_score(y_test, preds)
+        prec = precision_score(y_test, preds, zero_division=0)
+        rec = recall_score(y_test, preds, zero_division=0)
+        f1 = f1_score(y_test, preds, zero_division=0)
 
-        print(f"\nFold {fold_i}: train<={train_end}  test {test_start}..{test_end}")
-        print(f"  AUC-ROC: {auc:.3f}  Accuracy: {acc:.2%}")
+        print(f"\nFold {fold_i}: train<={train_end} -> test {test_start}..{test_end}")
+        print(f"  Train: {len(train):,} rows  Test: {len(test):,} rows")
+        print(f"  AUC: {auc:.3f}  Accuracy: {acc:.2%}  Precision: {prec:.3f}  Recall: {rec:.3f}  F1: {f1:.3f}")
 
         fold_results.append({
             "fold": fold_i, "train_end": train_end,
             "test_start": test_start, "test_end": test_end,
-            "auc": auc, "accuracy": acc,
             "train_rows": len(train), "test_rows": len(test),
+            "auc": auc, "accuracy": acc,
+            "precision": prec, "recall": rec, "f1": f1,
         })
 
-        out = test[["nta_code", "borough", "year_month", TARGET, "ed_high"]].copy()
-        out["prob_high"] = probs
-        out["pred_high"] = preds
-        out["fold"] = fold_i
-        all_preds.append(out)
+        test_out = test[["nta_code", "borough", "year_month", TARGET, "ed_high"]].copy()
+        test_out["pred_class"] = preds
+        test_out["pred_prob"] = probs
+        test_out["fold"] = fold_i
+        all_preds.append(test_out)
+
+    print("\n=== Training Final Model (all data) ===")
+    X_all = df[FEATURE_COLS]
+    y_all = df["ed_high"]
+    all_mean = X_all.mean()
+    all_std = X_all.std() + 1e-8
+    X_all_scaled = (X_all.fillna(all_mean) - all_mean) / all_std
+
+    final_model = LogisticRegression(max_iter=1000, random_state=42)
+    final_model.fit(X_all_scaled, y_all)
+
+    coefficients = pd.DataFrame({
+        "feature": FEATURE_COLS,
+        "coefficient": final_model.coef_[0],
+        "abs_coefficient": np.abs(final_model.coef_[0]),
+    }).sort_values("abs_coefficient", ascending=False)
+
+    pred_df = pd.concat(all_preds, ignore_index=True)
+    pred_df.to_csv(OUTPUT_DIR / "logistic_regression_predictions.csv", index=False)
+    coefficients.to_csv(OUTPUT_DIR / "logistic_regression_coefficients.csv", index=False)
 
     fold_df = pd.DataFrame(fold_results)
-    pred_df = pd.concat(all_preds, ignore_index=True)
-
-    fold_df.to_csv(OUTPUT_DIR / "logreg_fold_results.csv", index=False)
-    pred_df.to_csv(OUTPUT_DIR / "logreg_predictions.csv", index=False)
+    fold_df.to_csv(OUTPUT_DIR / "logistic_regression_fold_results.csv", index=False)
 
     summary_lines = [
-        "=== LOGISTIC REGRESSION EVALUATION SUMMARY ===",
+        "=== LOGISTIC REGRESSION BASELINE EVALUATION ===",
         f"Total rows: {len(df):,}  NTAs: {df['nta_code'].nunique()}  Months: {df['year_month'].nunique()}",
         f"Modeling window: {df['year_month'].min()} to {df['year_month'].max()}",
-        f"Target median (ed_visits): {median_target:.2f}",
+        f"Target: above-median ED visits (median = {median_target:.2f})",
+        f"Class balance: {df['ed_high'].mean():.2%} positive",
         "",
-        f"Mean AUC-ROC:  {fold_df['auc'].mean():.3f}",
-        f"Mean Accuracy: {fold_df['accuracy'].mean():.2%}",
+        "--- Walk-Forward CV Results ---",
+        f"Mean AUC-ROC:   {fold_df['auc'].mean():.3f}",
+        f"Mean Accuracy:  {fold_df['accuracy'].mean():.2%}",
+        f"Mean Precision: {fold_df['precision'].mean():.3f}",
+        f"Mean Recall:    {fold_df['recall'].mean():.3f}",
+        f"Mean F1:        {fold_df['f1'].mean():.3f}",
         "",
-        "Per-fold results:",
+        "--- Per-Fold Results ---",
     ]
     for _, row in fold_df.iterrows():
         summary_lines.append(
-            f"  Fold {int(row['fold'])}: AUC={row['auc']:.3f}  Acc={row['accuracy']:.2%}"
-            f"  ({int(row['train_rows'])} train / {int(row['test_rows'])} test)"
+            f"  Fold {int(row['fold'])}: AUC={row['auc']:.3f}  Acc={row['accuracy']:.2%}  "
+            f"P={row['precision']:.3f}  R={row['recall']:.3f}  F1={row['f1']:.3f}"
         )
 
+    summary_lines.extend([
+        "",
+        "--- Coefficients (top 10 by magnitude) ---",
+    ])
+    for _, row in coefficients.head(10).iterrows():
+        summary_lines.append(f"  {row['feature']:30s} {row['coefficient']:+.4f}")
+
+    summary_lines.extend([
+        "",
+        f"Intercept: {final_model.intercept_[0]:.4f}",
+    ])
+
     summary = "\n".join(summary_lines)
-    (OUTPUT_DIR / "logreg_summary.txt").write_text(summary)
+    (OUTPUT_DIR / "logistic_regression_summary.txt").write_text(summary)
+
     print(f"\n{summary}")
     print(f"\nSaved to {OUTPUT_DIR}/")
 
