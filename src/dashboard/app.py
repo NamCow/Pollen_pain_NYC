@@ -548,7 +548,7 @@ with map_col:
     st.markdown("### Neighborhood Risk Map")
 
     choropleth = build_choropleth(geojson_data, month_data, "display_value", st.session_state.selected_nta)
-    map_output = st_folium(choropleth, width=None, height=720, returned_objects=["last_object_clicked_tooltip"])
+    map_output = st_folium(choropleth, width=None, height=640, returned_objects=["last_object_clicked_tooltip"])
 
     if map_output and map_output.get("last_object_clicked_tooltip"):
         tooltip_text = str(map_output["last_object_clicked_tooltip"])
@@ -663,25 +663,7 @@ with detail_col:
                 )
                 st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
-            # 311 complaints
-            boro_311 = BOROUGH_MAP.get(nta["borough"], "")
-            if boro_311:
-                boro_complaints = complaints[complaints["borough"] == boro_311].sort_values("year_month").tail(12)
-                if not boro_complaints.empty:
-                    st.markdown("#### 311 Air Quality Complaints")
-                    fig311 = go.Figure()
-                    fig311.add_trace(go.Bar(
-                        x=boro_complaints["year_month"], y=boro_complaints["complaint_count"],
-                        marker_color="#8B7355", opacity=0.7,
-                    ))
-                    fig311.update_layout(
-                        height=160, margin=dict(l=0, r=0, t=10, b=30),
-                        plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
-                        font=dict(family="DM Sans", size=11, color="#5A5A5A"), showlegend=False,
-                        xaxis=dict(showgrid=False, tickfont=dict(size=10), tickangle=-45),
-                        yaxis=dict(showgrid=True, gridcolor="#F0EDE8", title=None, tickfont=dict(size=10)),
-                    )
-                    st.plotly_chart(fig311, use_container_width=True, config={"displayModeBar": False})
+
         else:
             st.info("Selected neighborhood not visible with current filters.")
     else:
