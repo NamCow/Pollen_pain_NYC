@@ -367,10 +367,21 @@ with st.sidebar:
 
     if is_prediction_view:
         month_options = pred_months
-        default_idx = len(month_options) - 1 if month_options else 0
     else:
         month_options = all_months
-        default_idx = len(month_options) - 1
+        
+    if "display_month" not in st.session_state:
+        st.session_state.display_month = month_options[-1] if month_options else None
+
+    # If the current stored month isn't in the new options list, default to latest
+    if st.session_state.display_month not in month_options:
+        st.session_state.display_month = month_options[-1] if month_options else None
+
+    # Find the valid index
+    try:
+        default_idx = month_options.index(st.session_state.display_month)
+    except (ValueError, TypeError):
+        default_idx = len(month_options) - 1 if month_options else 0
 
     selected_month = st.selectbox(
         "Month",
@@ -378,6 +389,9 @@ with st.sidebar:
         index=default_idx,
         format_func=lambda x: pd.Timestamp(x + "-01").strftime("%B %Y"),
     )
+    
+    # Save selection back to state
+    st.session_state.display_month = selected_month
 
     borough_options = ["All Boroughs"] + sorted(modeling["borough"].unique())
     selected_borough = st.selectbox("Borough", options=borough_options)
@@ -534,7 +548,7 @@ with map_col:
     st.markdown("### Neighborhood Risk Map")
 
     choropleth = build_choropleth(geojson_data, month_data, "display_value", st.session_state.selected_nta)
-    map_output = st_folium(choropleth, width=None, height=520, returned_objects=["last_object_clicked_tooltip"])
+    map_output = st_folium(choropleth, width=None, height=720, returned_objects=["last_object_clicked_tooltip"])
 
     if map_output and map_output.get("last_object_clicked_tooltip"):
         tooltip_text = str(map_output["last_object_clicked_tooltip"])
