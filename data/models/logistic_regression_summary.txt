@@ -1,0 +1,32 @@
+=== LOGISTIC REGRESSION BASELINE EVALUATION ===
+Total rows: 6,304  NTAs: 197  Months: 32
+Modeling window: 2022-03 to 2025-10
+Target: above-median ED visits (median = 27.16)
+Class balance: 50.38% positive
+
+--- Walk-Forward CV Results ---
+Mean AUC-ROC:   0.963
+Mean Accuracy:  75.55%
+Mean Precision: 0.827
+Mean Recall:    0.759
+Mean F1:        0.734
+
+--- Per-Fold Results ---
+  Fold 1: AUC=0.928  Acc=84.35%  P=0.874  R=0.829  F1=0.851
+  Fold 2: AUC=0.980  Acc=89.00%  P=0.823  R=0.958  F1=0.886
+  Fold 3: AUC=0.952  Acc=75.55%  P=0.612  R=0.955  F1=0.746
+  Fold 4: AUC=0.993  Acc=53.30%  P=1.000  R=0.292  F1=0.452
+
+--- Coefficients (top 10 by magnitude) ---
+  chs_asthma_pct                 +7.9313
+  temp_max_mean                  -2.4214
+  pollen_composite_avg           +2.1517
+  pollen_28d_lag_avg             -2.1391
+  tree_avg                       +2.1291
+  ozone_mean                     -2.0116
+  temp_min_mean                  +1.7924
+  no2_mean                       +1.1996
+  pollen_14d_lag_avg             -0.9364
+  wind_max_mean                  -0.7337
+
+Intercept: 0.0482
