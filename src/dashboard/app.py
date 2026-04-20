@@ -332,6 +332,11 @@ merged["has_prediction"] = merged["pred"].notna()
 
 # Months that have predictions
 pred_months = sorted(merged[merged["has_prediction"]]["year_month"].unique())
+
+# Drop trailing actuals that extend beyond the model's capability to ensure 1:1 UI alignment
+if pred_months:
+    merged = merged[merged["year_month"].isin(pred_months)]
+
 all_months = sorted(merged["year_month"].unique())
 
 # Risk thresholds from the full distribution of actual ED visits
