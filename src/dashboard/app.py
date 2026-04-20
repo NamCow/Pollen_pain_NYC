@@ -713,65 +713,6 @@ for col, features in [(fi_col1, top_features.head(5)), (fi_col2, top_features.ta
             """, unsafe_allow_html=True)
 
 
-# ── Borough comparison ───────────────────────────────────────────────────────
-
-st.markdown("## Borough Overview")
-
-borough_summary = (
-    month_data.groupby("borough")
-    .agg(
-        avg_val=("display_value", "mean"),
-        total_val=("display_value", "sum"),
-        nta_count=("nta_code", "nunique"),
-        severe=("risk_level", lambda x: (x == "Severe").sum()),
-        high=("risk_level", lambda x: (x == "High").sum()),
-    )
-    .reset_index()
-    .sort_values("avg_val", ascending=False)
-)
-
-fig_boro = go.Figure()
-colors = ["#C4501A", "#D4A017", "#2D7D4F", "#5A7D9A", "#8B7355"]
-val_label = "Avg Predicted ED Visits" if is_prediction_view else "Avg ED Visits"
-
-for i, (_, row) in enumerate(borough_summary.iterrows()):
-    fig_boro.add_trace(go.Bar(
-        x=[row["borough"]], y=[row["avg_val"]], name=row["borough"],
-        marker_color=colors[i % len(colors)],
-        text=f"{row['avg_val']:.1f}", textposition="outside",
-        textfont=dict(family="JetBrains Mono", size=12), showlegend=False,
-    ))
-
-fig_boro.update_layout(
-    height=300, margin=dict(l=0, r=0, t=20, b=40),
-    plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
-    font=dict(family="DM Sans", size=12, color="#5A5A5A"),
-    xaxis=dict(showgrid=False, tickfont=dict(size=12, family="DM Sans")),
-    yaxis=dict(showgrid=True, gridcolor="#F0EDE8", title=val_label, title_font=dict(size=11)),
-    bargap=0.4,
-)
-st.plotly_chart(fig_boro, use_container_width=True, config={"displayModeBar": False})
-
-
-# ── Highest-Risk Neighborhoods ──────────────────────────────────────────────
-
-st.markdown("## Highest-Risk Neighborhoods")
-
-top_risk = month_data.nlargest(15, "display_value").copy()
-display_df = pd.DataFrame({
-    "Neighborhood": top_risk["nta_name"].values,
-    "Borough": top_risk["borough"].values,
-    "Predicted" if is_prediction_view else "ED Visits": top_risk["display_value"].round(1).values,
-    "Risk": top_risk["risk_level"].values,
-    "Asthma Prev. (%)": top_risk["chs_asthma_pct"].round(1).values,
-    "Street Trees": top_risk["tree_count"].astype(int).values,
-})
-
-if is_prediction_view and top_risk["has_prediction"].any():
-    display_df.insert(3, "Actual", top_risk["ed_visits"].round(1).values)
-
-display_df.index = range(1, len(display_df) + 1)
-st.dataframe(display_df, use_container_width=True, height=400)
 
 
 # ── Footer ───────────────────────────────────────────────────────────────────
