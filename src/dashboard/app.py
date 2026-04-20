@@ -264,7 +264,20 @@ footer { visibility: hidden; }
 
 # ── Database connection ──────────────────────────────────────────────────────
 
-DB_PARAMS = dict(dbname="pollen_pain", host="localhost", port=5432)
+import os
+from dotenv import load_dotenv
+
+# Try to load .env from the parent directory
+load_dotenv(Path(__file__).parent.parent.parent.parent / ".env")
+
+DB_PARAMS = dict(
+    dbname=os.environ.get("DB_NAME", "postgres"),
+    user=os.environ.get("DB_USER", "postgres"),
+    password=os.environ.get("DB_PASSWORD", ""),
+    host=os.environ.get("DB_HOST", "localhost"),
+    port=int(os.environ.get("DB_PORT", 5432)),
+    sslmode="require",
+)
 GEOJSON_PATH = Path("./data/Input/nta2020.geojson")
 
 
@@ -840,7 +853,7 @@ fig_boro.update_layout(
     paper_bgcolor="rgba(0,0,0,0)",
     font=dict(family="DM Sans", size=12, color="#5A5A5A"),
     xaxis=dict(showgrid=False, tickfont=dict(size=12, family="DM Sans")),
-    yaxis=dict(showgrid=True, gridcolor="#F0EDE8", title="Avg. ED Visits per Neighborhood", titlefont=dict(size=11)),
+    yaxis=dict(showgrid=True, gridcolor="#F0EDE8", title="Avg. ED Visits per Neighborhood", title_font=dict(size=11)),
     bargap=0.4,
 )
 
