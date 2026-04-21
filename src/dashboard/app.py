@@ -25,6 +25,12 @@ NTA_SHP      = ROOT / "data/Input/nynta2020.shp"
 def load_predictions():
     path = PREDS_FINAL if PREDS_FINAL.exists() else PREDS_CV
     df = pd.read_csv(path)
+    if "NTAName" not in df.columns and MODELING.exists():
+        nta_names = (
+            pd.read_csv(MODELING, usecols=["nta_code", "NTAName"])
+            .drop_duplicates("nta_code")
+        )
+        df = df.merge(nta_names, on="nta_code", how="left")
     if "pred" not in df.columns:
         df["pred"] = df.get("pred", df.get("estimated_count", 0))
     if "ed_visits" not in df.columns:
@@ -213,6 +219,7 @@ with st.expander(f"Raw predictions — {selected_month}"):
     show_cols = ["nta_code", "NTAName", "borough", "year_month", "pred"]
     if "ed_visits" in month_df.columns:
         show_cols.append("ed_visits")
+    show_cols = [col for col in show_cols if col in month_df.columns]
     st.dataframe(
         month_df[show_cols].sort_values("pred", ascending=False),
         use_container_width=True,
