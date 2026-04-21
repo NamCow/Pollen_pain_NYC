@@ -26,8 +26,8 @@ OUTPUT = PROCESSED / "modeling_table.csv"
 def main():
     print("Loading target variable...")
     target = pd.read_csv(PROCESSED / "asthma_ed_monthly_nta.csv")
-    target = target[["NTA2020", "NTAName", "borough", "year_month", "estimated_count"]]
-    target = target.rename(columns={"NTA2020": "nta_code", "estimated_count": "ed_visits"})
+    target = target[["nta_code", "NTAName", "borough", "year_month", "estimated_count"]]
+    target = target.rename(columns={"estimated_count": "ed_visits"})
     print(f"  {len(target):,} rows, {target['nta_code'].nunique()} NTAs, {target['year_month'].nunique()} months")
 
     print("Loading weather...")

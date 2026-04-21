@@ -101,8 +101,10 @@ def main():
         y_test_bin = (y_test >= median_target).astype(int)
 
         lr = LogisticRegression(max_iter=1000, random_state=42)
-        X_train_scaled = (X_train - X_train.mean()) / (X_train.std() + 1e-8)
-        X_test_scaled = (X_test - X_train.mean()) / (X_train.std() + 1e-8)
+        train_mean = X_train.mean()
+        train_std = X_train.std() + 1e-8
+        X_train_scaled = (X_train.fillna(train_mean) - train_mean) / train_std
+        X_test_scaled = (X_test.fillna(train_mean) - train_mean) / train_std
         lr.fit(X_train_scaled, y_train_bin)
         lr_probs = lr.predict_proba(X_test_scaled)[:, 1]
         lr_preds = lr.predict(X_test_scaled)
