@@ -137,7 +137,7 @@ def main():
             "pct_ntas_within_15pct": pct_within_15,
         })
 
-        test_out = test[["nta_code", "borough", "year_month", TARGET]].copy()
+        test_out = test[["nta_code", "NTAName", "borough", "year_month", TARGET]].copy()
         test_out["pred"] = preds
         test_out["fold"] = fold_i
         all_preds.append(test_out)

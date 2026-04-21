@@ -1,0 +1,5 @@
+zip_code,endpoint,status,response_type,error
+11694,historic,OK,dict,
+10019,historic,OK,dict,
+11219,historic,OK,dict,
+11372,historic,OK,dict,

@@ -1,0 +1,225 @@
+Ind1Name;Dim1Name;Dim1Value;Dim2Name;Dim2Value;Date;number_of_visits
+Asthma;Borough;Bronx;Age Group;All age groups;2022-03-01;1406
+Asthma;Borough;Bronx;Age Group;All age groups;2022-04-01;1290
+Asthma;Borough;Bronx;Age Group;All age groups;2022-05-01;1789
+Asthma;Borough;Bronx;Age Group;All age groups;2022-06-01;1309
+Asthma;Borough;Bronx;Age Group;All age groups;2022-07-01;1060
+Asthma;Borough;Bronx;Age Group;All age groups;2022-08-01;1153
+Asthma;Borough;Bronx;Age Group;All age groups;2022-09-01;1672
+Asthma;Borough;Bronx;Age Group;All age groups;2022-10-01;1910
+Asthma;Borough;Bronx;Age Group;All age groups;2023-03-01;1657
+Asthma;Borough;Bronx;Age Group;All age groups;2023-04-01;1622
+Asthma;Borough;Bronx;Age Group;All age groups;2023-05-01;1721
+Asthma;Borough;Bronx;Age Group;All age groups;2023-06-01;1479
+Asthma;Borough;Bronx;Age Group;All age groups;2023-07-01;1212
+Asthma;Borough;Bronx;Age Group;All age groups;2023-08-01;1134
+Asthma;Borough;Bronx;Age Group;All age groups;2023-09-01;1473
+Asthma;Borough;Bronx;Age Group;All age groups;2023-10-01;1733
+Asthma;Borough;Bronx;Age Group;All age groups;2024-03-01;1359
+Asthma;Borough;Bronx;Age Group;All age groups;2024-04-01;1371
+Asthma;Borough;Bronx;Age Group;All age groups;2024-05-01;1732
+Asthma;Borough;Bronx;Age Group;All age groups;2024-06-01;1182
+Asthma;Borough;Bronx;Age Group;All age groups;2024-07-01;1172
+Asthma;Borough;Bronx;Age Group;All age groups;2024-08-01;1190
+Asthma;Borough;Bronx;Age Group;All age groups;2024-09-01;1734
+Asthma;Borough;Bronx;Age Group;All age groups;2024-10-01;1859
+Asthma;Borough;Bronx;Age Group;All age groups;2025-03-01;1419
+Asthma;Borough;Bronx;Age Group;All age groups;2025-04-01;1577
+Asthma;Borough;Bronx;Age Group;All age groups;2025-05-01;1711
+Asthma;Borough;Bronx;Age Group;All age groups;2025-06-01;1244
+Asthma;Borough;Bronx;Age Group;All age groups;2025-07-01;1061
+Asthma;Borough;Bronx;Age Group;All age groups;2025-08-01;1126
+Asthma;Borough;Bronx;Age Group;All age groups;2025-09-01;1545
+Asthma;Borough;Bronx;Age Group;All age groups;2025-10-01;1571
+Asthma;Borough;Brooklyn;Age Group;All age groups;2022-03-01;1642
+Asthma;Borough;Brooklyn;Age Group;All age groups;2022-04-01;1540
+Asthma;Borough;Brooklyn;Age Group;All age groups;2022-05-01;2155
+Asthma;Borough;Brooklyn;Age Group;All age groups;2022-06-01;1508
+Asthma;Borough;Brooklyn;Age Group;All age groups;2022-07-01;1377
+Asthma;Borough;Brooklyn;Age Group;All age groups;2022-08-01;1308
+Asthma;Borough;Brooklyn;Age Group;All age groups;2022-09-01;1827
+Asthma;Borough;Brooklyn;Age Group;All age groups;2022-10-01;2066
+Asthma;Borough;Brooklyn;Age Group;All age groups;2023-03-01;1633
+Asthma;Borough;Brooklyn;Age Group;All age groups;2023-04-01;1914
+Asthma;Borough;Brooklyn;Age Group;All age groups;2023-05-01;1931
+Asthma;Borough;Brooklyn;Age Group;All age groups;2023-06-01;1760
+Asthma;Borough;Brooklyn;Age Group;All age groups;2023-07-01;1442
+Asthma;Borough;Brooklyn;Age Group;All age groups;2023-08-01;1449
+Asthma;Borough;Brooklyn;Age Group;All age groups;2023-09-01;1753
+Asthma;Borough;Brooklyn;Age Group;All age groups;2023-10-01;2030
+Asthma;Borough;Brooklyn;Age Group;All age groups;2024-03-01;1538
+Asthma;Borough;Brooklyn;Age Group;All age groups;2024-04-01;1636
+Asthma;Borough;Brooklyn;Age Group;All age groups;2024-05-01;1928
+Asthma;Borough;Brooklyn;Age Group;All age groups;2024-06-01;1406
+Asthma;Borough;Brooklyn;Age Group;All age groups;2024-07-01;1334
+Asthma;Borough;Brooklyn;Age Group;All age groups;2024-08-01;1423
+Asthma;Borough;Brooklyn;Age Group;All age groups;2024-09-01;1775
+Asthma;Borough;Brooklyn;Age Group;All age groups;2024-10-01;1834
+Asthma;Borough;Brooklyn;Age Group;All age groups;2025-03-01;1558
+Asthma;Borough;Brooklyn;Age Group;All age groups;2025-04-01;1784
+Asthma;Borough;Brooklyn;Age Group;All age groups;2025-05-01;1973
+Asthma;Borough;Brooklyn;Age Group;All age groups;2025-06-01;1433
+Asthma;Borough;Brooklyn;Age Group;All age groups;2025-07-01;1376
+Asthma;Borough;Brooklyn;Age Group;All age groups;2025-08-01;1437
+Asthma;Borough;Brooklyn;Age Group;All age groups;2025-09-01;1716
+Asthma;Borough;Brooklyn;Age Group;All age groups;2025-10-01;1699
+Asthma;Borough;Manhattan;Age Group;All age groups;2022-03-01;982
+Asthma;Borough;Manhattan;Age Group;All age groups;2022-04-01;888
+Asthma;Borough;Manhattan;Age Group;All age groups;2022-05-01;1135
+Asthma;Borough;Manhattan;Age Group;All age groups;2022-06-01;802
+Asthma;Borough;Manhattan;Age Group;All age groups;2022-07-01;681
+Asthma;Borough;Manhattan;Age Group;All age groups;2022-08-01;690
+Asthma;Borough;Manhattan;Age Group;All age groups;2022-09-01;969
+Asthma;Borough;Manhattan;Age Group;All age groups;2022-10-01;1080
+Asthma;Borough;Manhattan;Age Group;All age groups;2023-03-01;927
+Asthma;Borough;Manhattan;Age Group;All age groups;2023-04-01;898
+Asthma;Borough;Manhattan;Age Group;All age groups;2023-05-01;1004
+Asthma;Borough;Manhattan;Age Group;All age groups;2023-06-01;901
+Asthma;Borough;Manhattan;Age Group;All age groups;2023-07-01;750
+Asthma;Borough;Manhattan;Age Group;All age groups;2023-08-01;755
+Asthma;Borough;Manhattan;Age Group;All age groups;2023-09-01;820
+Asthma;Borough;Manhattan;Age Group;All age groups;2023-10-01;955
+Asthma;Borough;Manhattan;Age Group;All age groups;2024-03-01;863
+Asthma;Borough;Manhattan;Age Group;All age groups;2024-04-01;950
+Asthma;Borough;Manhattan;Age Group;All age groups;2024-05-01;1005
+Asthma;Borough;Manhattan;Age Group;All age groups;2024-06-01;751
+Asthma;Borough;Manhattan;Age Group;All age groups;2024-07-01;776
+Asthma;Borough;Manhattan;Age Group;All age groups;2024-08-01;707
+Asthma;Borough;Manhattan;Age Group;All age groups;2024-09-01;918
+Asthma;Borough;Manhattan;Age Group;All age groups;2024-10-01;983
+Asthma;Borough;Manhattan;Age Group;All age groups;2025-03-01;809
+Asthma;Borough;Manhattan;Age Group;All age groups;2025-04-01;866
+Asthma;Borough;Manhattan;Age Group;All age groups;2025-05-01;942
+Asthma;Borough;Manhattan;Age Group;All age groups;2025-06-01;745
+Asthma;Borough;Manhattan;Age Group;All age groups;2025-07-01;681
+Asthma;Borough;Manhattan;Age Group;All age groups;2025-08-01;678
+Asthma;Borough;Manhattan;Age Group;All age groups;2025-09-01;915
+Asthma;Borough;Manhattan;Age Group;All age groups;2025-10-01;869
+Asthma;Borough;Queens;Age Group;All age groups;2022-03-01;873
+Asthma;Borough;Queens;Age Group;All age groups;2022-04-01;780
+Asthma;Borough;Queens;Age Group;All age groups;2022-05-01;993
+Asthma;Borough;Queens;Age Group;All age groups;2022-06-01;705
+Asthma;Borough;Queens;Age Group;All age groups;2022-07-01;625
+Asthma;Borough;Queens;Age Group;All age groups;2022-08-01;622
+Asthma;Borough;Queens;Age Group;All age groups;2022-09-01;940
+Asthma;Borough;Queens;Age Group;All age groups;2022-10-01;1071
+Asthma;Borough;Queens;Age Group;All age groups;2023-03-01;934
+Asthma;Borough;Queens;Age Group;All age groups;2023-04-01;1099
+Asthma;Borough;Queens;Age Group;All age groups;2023-05-01;931
+Asthma;Borough;Queens;Age Group;All age groups;2023-06-01;864
+Asthma;Borough;Queens;Age Group;All age groups;2023-07-01;755
+Asthma;Borough;Queens;Age Group;All age groups;2023-08-01;733
+Asthma;Borough;Queens;Age Group;All age groups;2023-09-01;909
+Asthma;Borough;Queens;Age Group;All age groups;2023-10-01;955
+Asthma;Borough;Queens;Age Group;All age groups;2024-03-01;827
+Asthma;Borough;Queens;Age Group;All age groups;2024-04-01;824
+Asthma;Borough;Queens;Age Group;All age groups;2024-05-01;1013
+Asthma;Borough;Queens;Age Group;All age groups;2024-06-01;795
+Asthma;Borough;Queens;Age Group;All age groups;2024-07-01;684
+Asthma;Borough;Queens;Age Group;All age groups;2024-08-01;691
+Asthma;Borough;Queens;Age Group;All age groups;2024-09-01;837
+Asthma;Borough;Queens;Age Group;All age groups;2024-10-01;1036
+Asthma;Borough;Queens;Age Group;All age groups;2025-03-01;871
+Asthma;Borough;Queens;Age Group;All age groups;2025-04-01;858
+Asthma;Borough;Queens;Age Group;All age groups;2025-05-01;982
+Asthma;Borough;Queens;Age Group;All age groups;2025-06-01;700
+Asthma;Borough;Queens;Age Group;All age groups;2025-07-01;586
+Asthma;Borough;Queens;Age Group;All age groups;2025-08-01;578
+Asthma;Borough;Queens;Age Group;All age groups;2025-09-01;857
+Asthma;Borough;Queens;Age Group;All age groups;2025-10-01;821
+Asthma;Borough;Staten Island;Age Group;All age groups;2022-03-01;453
+Asthma;Borough;Staten Island;Age Group;All age groups;2022-04-01;359
+Asthma;Borough;Staten Island;Age Group;All age groups;2022-05-01;472
+Asthma;Borough;Staten Island;Age Group;All age groups;2022-06-01;382
+Asthma;Borough;Staten Island;Age Group;All age groups;2022-07-01;342
+Asthma;Borough;Staten Island;Age Group;All age groups;2022-08-01;387
+Asthma;Borough;Staten Island;Age Group;All age groups;2022-09-01;377
+Asthma;Borough;Staten Island;Age Group;All age groups;2022-10-01;447
+Asthma;Borough;Staten Island;Age Group;All age groups;2023-03-01;403
+Asthma;Borough;Staten Island;Age Group;All age groups;2023-04-01;429
+Asthma;Borough;Staten Island;Age Group;All age groups;2023-05-01;160
+Asthma;Borough;Staten Island;Age Group;All age groups;2023-06-01;119
+Asthma;Borough;Staten Island;Age Group;All age groups;2023-07-01;77
+Asthma;Borough;Staten Island;Age Group;All age groups;2023-08-01;153
+Asthma;Borough;Staten Island;Age Group;All age groups;2023-09-01;361
+Asthma;Borough;Staten Island;Age Group;All age groups;2023-10-01;443
+Asthma;Borough;Staten Island;Age Group;All age groups;2024-03-01;455
+Asthma;Borough;Staten Island;Age Group;All age groups;2024-04-01;426
+Asthma;Borough;Staten Island;Age Group;All age groups;2024-05-01;502
+Asthma;Borough;Staten Island;Age Group;All age groups;2024-06-01;430
+Asthma;Borough;Staten Island;Age Group;All age groups;2024-07-01;444
+Asthma;Borough;Staten Island;Age Group;All age groups;2024-08-01;409
+Asthma;Borough;Staten Island;Age Group;All age groups;2024-09-01;432
+Asthma;Borough;Staten Island;Age Group;All age groups;2024-10-01;448
+Asthma;Borough;Staten Island;Age Group;All age groups;2025-03-01;419
+Asthma;Borough;Staten Island;Age Group;All age groups;2025-04-01;464
+Asthma;Borough;Staten Island;Age Group;All age groups;2025-05-01;488
+Asthma;Borough;Staten Island;Age Group;All age groups;2025-06-01;375
+Asthma;Borough;Staten Island;Age Group;All age groups;2025-07-01;404
+Asthma;Borough;Staten Island;Age Group;All age groups;2025-08-01;378
+Asthma;Borough;Staten Island;Age Group;All age groups;2025-09-01;455
+Asthma;Borough;Staten Island;Age Group;All age groups;2025-10-01;426
+Asthma;Borough;Unknown;Age Group;All age groups;2022-03-01;181
+Asthma;Borough;Unknown;Age Group;All age groups;2022-04-01;192
+Asthma;Borough;Unknown;Age Group;All age groups;2022-05-01;254
+Asthma;Borough;Unknown;Age Group;All age groups;2022-06-01;173
+Asthma;Borough;Unknown;Age Group;All age groups;2022-07-01;163
+Asthma;Borough;Unknown;Age Group;All age groups;2022-08-01;206
+Asthma;Borough;Unknown;Age Group;All age groups;2022-09-01;267
+Asthma;Borough;Unknown;Age Group;All age groups;2022-10-01;257
+Asthma;Borough;Unknown;Age Group;All age groups;2023-03-01;183
+Asthma;Borough;Unknown;Age Group;All age groups;2023-04-01;256
+Asthma;Borough;Unknown;Age Group;All age groups;2023-05-01;216
+Asthma;Borough;Unknown;Age Group;All age groups;2023-06-01;223
+Asthma;Borough;Unknown;Age Group;All age groups;2023-07-01;204
+Asthma;Borough;Unknown;Age Group;All age groups;2023-08-01;180
+Asthma;Borough;Unknown;Age Group;All age groups;2023-09-01;233
+Asthma;Borough;Unknown;Age Group;All age groups;2023-10-01;242
+Asthma;Borough;Unknown;Age Group;All age groups;2024-03-01;220
+Asthma;Borough;Unknown;Age Group;All age groups;2024-04-01;174
+Asthma;Borough;Unknown;Age Group;All age groups;2024-05-01;273
+Asthma;Borough;Unknown;Age Group;All age groups;2024-06-01;165
+Asthma;Borough;Unknown;Age Group;All age groups;2024-07-01;148
+Asthma;Borough;Unknown;Age Group;All age groups;2024-08-01;182
+Asthma;Borough;Unknown;Age Group;All age groups;2024-09-01;273
+Asthma;Borough;Unknown;Age Group;All age groups;2024-10-01;262
+Asthma;Borough;Unknown;Age Group;All age groups;2025-03-01;223
+Asthma;Borough;Unknown;Age Group;All age groups;2025-04-01;241
+Asthma;Borough;Unknown;Age Group;All age groups;2025-05-01;260
+Asthma;Borough;Unknown;Age Group;All age groups;2025-06-01;189
+Asthma;Borough;Unknown;Age Group;All age groups;2025-07-01;143
+Asthma;Borough;Unknown;Age Group;All age groups;2025-08-01;180
+Asthma;Borough;Unknown;Age Group;All age groups;2025-09-01;236
+Asthma;Borough;Unknown;Age Group;All age groups;2025-10-01;254
+Asthma;Citywide;Citywide;Age Group;All age groups;2022-03-01;5537
+Asthma;Citywide;Citywide;Age Group;All age groups;2022-04-01;5049
+Asthma;Citywide;Citywide;Age Group;All age groups;2022-05-01;6798
+Asthma;Citywide;Citywide;Age Group;All age groups;2022-06-01;4879
+Asthma;Citywide;Citywide;Age Group;All age groups;2022-07-01;4248
+Asthma;Citywide;Citywide;Age Group;All age groups;2022-08-01;4366
+Asthma;Citywide;Citywide;Age Group;All age groups;2022-09-01;6052
+Asthma;Citywide;Citywide;Age Group;All age groups;2022-10-01;6831
+Asthma;Citywide;Citywide;Age Group;All age groups;2023-03-01;5737
+Asthma;Citywide;Citywide;Age Group;All age groups;2023-04-01;6218
+Asthma;Citywide;Citywide;Age Group;All age groups;2023-05-01;5963
+Asthma;Citywide;Citywide;Age Group;All age groups;2023-06-01;5346
+Asthma;Citywide;Citywide;Age Group;All age groups;2023-07-01;4440
+Asthma;Citywide;Citywide;Age Group;All age groups;2023-08-01;4404
+Asthma;Citywide;Citywide;Age Group;All age groups;2023-09-01;5549
+Asthma;Citywide;Citywide;Age Group;All age groups;2023-10-01;6358
+Asthma;Citywide;Citywide;Age Group;All age groups;2024-03-01;5262
+Asthma;Citywide;Citywide;Age Group;All age groups;2024-04-01;5381
+Asthma;Citywide;Citywide;Age Group;All age groups;2024-05-01;6453
+Asthma;Citywide;Citywide;Age Group;All age groups;2024-06-01;4729
+Asthma;Citywide;Citywide;Age Group;All age groups;2024-07-01;4558
+Asthma;Citywide;Citywide;Age Group;All age groups;2024-08-01;4602
+Asthma;Citywide;Citywide;Age Group;All age groups;2024-09-01;5969
+Asthma;Citywide;Citywide;Age Group;All age groups;2024-10-01;6422
+Asthma;Citywide;Citywide;Age Group;All age groups;2025-03-01;5299
+Asthma;Citywide;Citywide;Age Group;All age groups;2025-04-01;5790
+Asthma;Citywide;Citywide;Age Group;All age groups;2025-05-01;6356
+Asthma;Citywide;Citywide;Age Group;All age groups;2025-06-01;4686
+Asthma;Citywide;Citywide;Age Group;All age groups;2025-07-01;4251
+Asthma;Citywide;Citywide;Age Group;All age groups;2025-08-01;4377
+Asthma;Citywide;Citywide;Age Group;All age groups;2025-09-01;5724
+Asthma;Citywide;Citywide;Age Group;All age groups;2025-10-01;5640
