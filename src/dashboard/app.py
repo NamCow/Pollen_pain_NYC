@@ -31,6 +31,7 @@ st.markdown("""
 
 :root {
     --bg-warm: #FAF8F5;
+    --panel-bg: #FFFBEB;
     --bg-card: #FFFFFF;
     --text-primary: #1A1A1A;
     --text-secondary: #5A5A5A;
@@ -48,8 +49,20 @@ st.markdown("""
     --pollen-mold: #8B7355;
 }
 
-.stApp { background-color: var(--bg-warm) !important; }
+.stApp,
+html,
+body,
+[data-testid="stAppViewContainer"] {
+    background: var(--panel-bg) !important;
+}
 .stApp header { background-color: transparent !important; }
+[data-testid="stAppViewContainer"] > .main {
+    background: var(--panel-bg) !important;
+}
+[data-testid="stAppViewContainer"] > .main > div,
+.block-container {
+    background: transparent !important;
+}
 
 h1, h2, h3, h4 {
     font-family: 'Playfair Display', Georgia, 'Times New Roman', serif !important;
@@ -63,13 +76,23 @@ h2 {
 }
 h3 { font-size: 1.1rem !important; font-weight: 600 !important; color: var(--text-secondary) !important; }
 
-p, li, span, div, label, .stMarkdown {
+p, li, .stMarkdown,
+.stApp label,
+.stApp [data-testid="stSidebar"] {
     font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
     color: var(--text-primary);
 }
 
+/* Keep Streamlit's Material icon ligatures on their own font. */
+.material-symbols-rounded,
+.material-symbols-outlined,
+[data-testid="stIconMaterial"] {
+    font-family: "Material Symbols Rounded", "Material Symbols Outlined", sans-serif !important;
+    color: inherit;
+}
+
 section[data-testid="stSidebar"] {
-    background-color: #F5F2ED !important;
+    background-color: var(--panel-bg) !important;
     border-right: 1px solid var(--border);
 }
 section[data-testid="stSidebar"] .stSelectbox label,
@@ -78,10 +101,33 @@ section[data-testid="stSidebar"] .stMultiSelect label {
     font-size: 0.85rem !important; text-transform: uppercase !important;
     letter-spacing: 0.06em !important; color: var(--text-muted) !important;
 }
+.sidebar-brand {
+    margin-bottom: 1.2rem;
+}
+.sidebar-brand-title {
+    font-family: 'Playfair Display', Georgia, 'Times New Roman', serif !important;
+    font-size: clamp(1.2rem, 2vw, 1.65rem);
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    overflow-wrap: anywhere;
+}
+.sidebar-brand-subtitle {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: clamp(0.7rem, 1.2vw, 0.78rem);
+    color: var(--text-muted);
+    margin-top: 0.35rem;
+    letter-spacing: 0.03em;
+    line-height: 1.35;
+}
 
 div[data-testid="stMetric"] {
-    background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: 6px; padding: 14px 18px;
+    background: linear-gradient(180deg, #FFFFFF 0%, #FCFAF7 100%);
+    border: 1px solid #E7DED2;
+    border-radius: 10px;
+    padding: 14px 18px;
+    box-shadow: 0 10px 24px rgba(90, 60, 25, 0.05);
 }
 div[data-testid="stMetric"] label {
     font-family: 'DM Sans', sans-serif !important; font-size: 0.75rem !important;
@@ -93,8 +139,12 @@ div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
 }
 
 .pollen-strip {
-    background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: 8px; padding: 16px 24px; margin-bottom: 1.2rem;
+    background: linear-gradient(180deg, #FFFFFF 0%, #FCFAF7 100%);
+    border: 1px solid #E7DED2;
+    border-radius: 12px;
+    padding: 16px 24px;
+    margin-bottom: 1.2rem;
+    box-shadow: 0 12px 28px rgba(90, 60, 25, 0.05);
 }
 .pollen-strip-title {
     font-family: 'DM Sans', sans-serif; font-size: 0.72rem;
@@ -115,10 +165,53 @@ div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
 .risk-severe { background: #FFEBEE; color: #A8201A; }
 
 .detail-panel {
-    background: var(--bg-card); border: 1px solid var(--border);
-    border-radius: 8px; padding: 20px 24px; margin-top: 1rem;
+    background:
+        radial-gradient(circle at top right, rgba(255, 224, 188, 0.28), transparent 34%),
+        linear-gradient(180deg, #FFFFFF 0%, #FCFAF7 100%);
+    border: 1px solid #E7DED2;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-top: 1rem;
+    box-shadow: 0 14px 32px rgba(90, 60, 25, 0.06);
 }
 .detail-panel h3 { font-family: 'Playfair Display', serif !important; margin-bottom: 4px; }
+.prediction-note {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    background: linear-gradient(135deg, #FBF7F0 0%, #F6EFE3 100%);
+    border: 1px solid #E7DED2;
+    border-left: 4px solid var(--accent-warm);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    line-height: 1.55;
+    box-shadow: 0 8px 22px rgba(196, 80, 26, 0.08);
+}
+.panel-heading {
+    display: inline-block;
+    margin: 0 0 0.85rem 0;
+    padding: 0.35rem 0.8rem 0.4rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: linear-gradient(135deg, #FFF7ED 0%, #FDEBD2 100%);
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-warm) !important;
+}
+.panel-heading-map {
+    background: linear-gradient(135deg, #FFF7ED 0%, #FDEBD2 100%);
+    color: var(--accent-warm) !important;
+}
+.panel-heading-detail {
+    background: linear-gradient(135deg, #FFF4DB 0%, #FFE3A3 100%);
+    border-color: #E7C56B;
+    color: #8B5A00 !important;
+    box-shadow: 0 6px 18px rgba(196, 80, 26, 0.08);
+}
 .stat-row {
     display: flex; justify-content: space-between; padding: 6px 0;
     border-bottom: 1px solid #F0EDE8; font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
@@ -134,6 +227,37 @@ div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
 .footer {
     margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border);
     font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--text-muted); line-height: 1.6;
+}
+
+.sidebar-copy {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+.sidebar-copy strong,
+.sidebar-copy p,
+.sidebar-copy div,
+.sidebar-copy span {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+.sidebar-copy strong {
+    color: var(--text-secondary) !important;
+    font-weight: 600;
+}
+.sidebar-section {
+    margin: 0 0 0.8rem 0;
+}
+.sidebar-section:last-child {
+    margin-bottom: 0;
+}
+.sidebar-section-title {
+    color: var(--text-secondary) !important;
+    font-weight: 600;
+    margin-bottom: 0.15rem;
+}
+.sidebar-section-body {
+    color: var(--text-muted);
 }
 
 .data-source-tag {
@@ -167,6 +291,7 @@ DB_PARAMS = dict(
     sslmode="require" if os.environ.get("DB_HOST") != "localhost" else "prefer",
 )
 GEOJSON_PATH = Path("./data/Input/nta2020.geojson")
+FOLD_RESULTS_PATH = Path("./data/models/fold_results.csv")
 
 
 @st.cache_data(ttl=300)
@@ -182,6 +307,13 @@ def query_db(sql: str) -> pd.DataFrame:
 def load_geojson():
     with open(GEOJSON_PATH) as f:
         return json.load(f)
+
+
+@st.cache_data
+def load_fold_results():
+    if FOLD_RESULTS_PATH.exists():
+        return pd.read_csv(FOLD_RESULTS_PATH)
+    return pd.DataFrame()
 
 
 @st.cache_data
@@ -324,17 +456,26 @@ def build_choropleth(geojson_data, month_data, value_col, selected_nta=None):
 # ── Load all data ────────────────────────────────────────────────────────────
 
 modeling, predictions, feature_imp, complaints, pollen_monthly, neighborhoods = load_all_data()
+fold_results = load_fold_results()
 geojson_data = load_geojson()
 
-# Build merged view: for months with predictions, use the latest fold's prediction
-# Take the highest fold per (nta_code, year_month) as the best prediction
+# Prefer final-model fitted predictions when available. If the database only has
+# CV outputs, fall back to the latest fold-specific prediction per month.
+prediction_mode = "none"
 if not predictions.empty:
-    latest_preds = (
-        predictions
-        .sort_values("fold")
-        .drop_duplicates(subset=["nta_code", "year_month"], keep="last")
-        [["nta_code", "year_month", "pred", "fold"]]
-    )
+    if predictions["fold"].fillna(-1).eq(0).all():
+        latest_preds = predictions[["nta_code", "year_month", "pred", "fold"]].drop_duplicates(
+            subset=["nta_code", "year_month"]
+        )
+        prediction_mode = "full_period"
+    else:
+        latest_preds = (
+            predictions
+            .sort_values("fold")
+            .drop_duplicates(subset=["nta_code", "year_month"], keep="last")
+            [["nta_code", "year_month", "pred", "fold"]]
+        )
+        prediction_mode = "cv_holdout"
     merged = modeling.merge(latest_preds, on=["nta_code", "year_month"], how="left")
 else:
     merged = modeling.copy()
@@ -350,8 +491,6 @@ pred_months = sorted(merged[merged["has_prediction"]]["year_month"].unique())
 if pred_months:
     merged = merged[merged["year_month"].isin(pred_months)]
 
-all_months = sorted(merged["year_month"].unique())
-
 # Risk thresholds from the full distribution of actual ED visits
 ed_q25 = modeling["ed_visits"].quantile(0.25)
 ed_q75 = modeling["ed_visits"].quantile(0.75)
@@ -362,31 +501,19 @@ ed_q90 = modeling["ed_visits"].quantile(0.90)
 
 with st.sidebar:
     st.markdown("""
-    <div style="margin-bottom: 1.2rem;">
-        <span style="font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: #1A1A1A; line-height: 1.2;">
-            Pollen &<br>Pain
-        </span>
-        <div style="font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: #8A8A8A; margin-top: 4px; letter-spacing: 0.03em;">
+    <div class="sidebar-brand">
+        <div class="sidebar-brand-title">
+            Pollen & Pain
+        </div>
+        <div class="sidebar-brand-subtitle">
             NYC Asthma ED Forecasting
         </div>
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown("---")
-
-    view_mode = st.radio(
-        "View",
-        ["Model Predictions", "Actual ED Visits"],
-        index=0,
-        help="Model Predictions shows XGBoost forecasts. Actual shows observed ED visit estimates.",
-    )
-
-    is_prediction_view = view_mode == "Model Predictions"
-
-    if is_prediction_view:
-        month_options = pred_months
-    else:
-        month_options = all_months
+    is_prediction_view = True
+    month_options = pred_months
         
     if "display_month" not in st.session_state:
         st.session_state.display_month = month_options[-1] if month_options else None
@@ -419,16 +546,42 @@ with st.sidebar:
 
     st.markdown("---")
 
-    st.markdown("""
-    <div style="font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: #8A8A8A; line-height: 1.6;">
-        <strong style="color: #5A5A5A;">About</strong><br>
-        Predicts monthly asthma emergency department visit counts at the
-        neighborhood level across all five NYC boroughs.<br><br>
-        <strong style="color: #5A5A5A;">Model</strong><br>
-        XGBoost regression with walk-forward time-series validation.
-        Mean MAE 2.33, Pearson r 0.955 across 4 validation folds.<br><br>
-        <strong style="color: #5A5A5A;">Team</strong><br>
-        Saketh Boddu · Andre Nguyen · Nam Lai
+    if not fold_results.empty:
+        mean_mae = fold_results["mae"].mean()
+        mean_rmse = fold_results["rmse"].mean()
+        mean_r = fold_results["pearson_r"].mean()
+        mean_within = fold_results["pct_ntas_within_15pct"].mean()
+        model_metrics_html = (
+            "XGBoost regression with walk-forward time-series validation.<br>"
+            f"Mean MAE {mean_mae:.2f} · Mean RMSE {mean_rmse:.2f}<br>"
+            f"Mean Pearson r {mean_r:.3f} · {mean_within:.1%} of NTAs within 15%"
+        )
+    else:
+        model_metrics_html = "XGBoost regression with walk-forward time-series validation."
+
+    st.markdown(f"""
+    <div class="sidebar-copy">
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">About</div>
+            <div class="sidebar-section-body">
+                Predicts monthly asthma emergency department visit counts at the
+                neighborhood level across all five NYC boroughs.
+            </div>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Model Evaluation</div>
+            <div class="sidebar-section-body">{model_metrics_html}</div>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Prediction View</div>
+            <div class="sidebar-section-body">
+                Map and charts use fitted predictions from the final model across the full available period, not CV holdout performance.
+            </div>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Team</div>
+            <div class="sidebar-section-body">Saketh Boddu · Andre Nguyen · Nam Lai</div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -438,13 +591,11 @@ with st.sidebar:
 month_data = merged[merged["year_month"] == selected_month].copy()
 
 # Determine which column to display on the map
-if is_prediction_view and month_data["has_prediction"].any():
+if month_data["has_prediction"].any():
     display_col = "pred"
-    source_label = "Model Prediction"
-    source_tag = '<span class="data-source-tag tag-predicted">Predicted</span>'
+    source_tag = '<span class="data-source-tag tag-predicted">Fitted Predictions</span>'
 else:
     display_col = "ed_visits"
-    source_label = "Observed Estimate"
     source_tag = '<span class="data-source-tag tag-actual">Actual</span>'
 
 month_data["display_value"] = month_data[display_col]
@@ -456,6 +607,74 @@ if selected_borough != "All Boroughs":
     month_data = month_data[month_data["borough"] == selected_borough]
 if selected_risk != "All Levels":
     month_data = month_data[month_data["risk_level"] == selected_risk]
+
+
+# ── Model evaluation ─────────────────────────────────────────────────────────
+
+st.markdown("## Model Evaluation")
+st.markdown("""
+<div style="font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1rem; max-width: 760px;">
+    These metrics come from 4 walk-forward cross-validation folds and reflect out-of-sample model performance.
+    The map and charts below do not use these holdout predictions; they use fitted full-period predictions from the final model.
+</div>
+""", unsafe_allow_html=True)
+
+if not fold_results.empty:
+    eval_col1, eval_col2, eval_col3, eval_col4 = st.columns(4)
+    with eval_col1:
+        st.metric("Mean MAE Across 4 Folds", f"{fold_results['mae'].mean():.2f}")
+    with eval_col2:
+        st.metric("Mean RMSE Across 4 Folds", f"{fold_results['rmse'].mean():.2f}")
+    with eval_col3:
+        st.metric("Mean Pearson r Across 4 Folds", f"{fold_results['pearson_r'].mean():.3f}")
+    with eval_col4:
+        st.metric("Mean NTAs Within 15%", f"{fold_results['pct_ntas_within_15pct'].mean():.1%}")
+
+    st.markdown("### Fold-by-Fold Performance")
+    eval_table = fold_results.copy()
+    eval_table["Fold"] = eval_table["fold"].astype(int)
+    eval_table["Validation Window"] = eval_table["test_start"] + " to " + eval_table["test_end"]
+    eval_table = eval_table.rename(columns={
+        "mae": "MAE",
+        "rmse": "RMSE",
+        "pearson_r": "Pearson r",
+        "pct_ntas_within_15pct": "NTAs within 15%",
+    })
+    st.dataframe(
+        eval_table[["Fold", "Validation Window", "MAE", "RMSE", "Pearson r", "NTAs within 15%"]],
+        use_container_width=True,
+        hide_index=True,
+    )
+
+    eval_chart = go.Figure()
+    eval_chart.add_trace(go.Bar(
+        x=fold_results["fold"],
+        y=fold_results["mae"],
+        name="MAE",
+        marker_color="#C4501A",
+        offsetgroup=1,
+    ))
+    eval_chart.add_trace(go.Bar(
+        x=fold_results["fold"],
+        y=fold_results["rmse"],
+        name="RMSE",
+        marker_color="#B8860B",
+        offsetgroup=2,
+    ))
+    eval_chart.update_layout(
+        height=320,
+        margin=dict(l=0, r=0, t=10, b=0),
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        font=dict(family="DM Sans", size=12, color="#5A5A5A"),
+        barmode="group",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        xaxis=dict(title="Fold", tickmode="array", tickvals=fold_results["fold"].tolist(), showgrid=False),
+        yaxis=dict(title="Error", gridcolor="#F0EDE8"),
+    )
+    st.plotly_chart(eval_chart, use_container_width=True, config={"displayModeBar": False})
+else:
+    st.info("Cross-validation fold metrics were not found. Add `data/models/fold_results.csv` to show model evaluation.")
 
 
 # ── Pollen strip ─────────────────────────────────────────────────────────────
@@ -508,14 +727,25 @@ else:
 # ── Header + source indicator ────────────────────────────────────────────────
 
 display_month = pd.Timestamp(selected_month + "-01").strftime("%B %Y")
+section_title = "Full-period Prediction View"
+st.markdown(f"## {section_title}")
 st.markdown(f'<h2 style="border:none; padding:0;">{display_month} {source_tag}</h2>', unsafe_allow_html=True)
 
-if is_prediction_view and month_data["has_prediction"].any():
-    fold_num = int(month_data["fold"].dropna().iloc[0])
+if month_data["has_prediction"].any():
+    if prediction_mode == "full_period":
+        prediction_note = (
+            "Showing fitted predictions from the final XGBoost model trained on the full dataset. "
+            "These values cover the full available timeline and support map, chart, and neighborhood exploration. "
+            "They should not be interpreted as cross-validation performance."
+        )
+    else:
+        prediction_note = (
+            "Showing predictions from the available model output for this period. "
+            "Cross-validation performance is summarized above in the Model Evaluation section."
+        )
     st.markdown(f"""
-    <div style="font-family: 'DM Sans', sans-serif; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.8rem;">
-        Showing XGBoost predictions from validation fold {fold_num}.
-        The model was trained on earlier months and tested on this period.
+    <div class="prediction-note">
+        {prediction_note}
     </div>
     """, unsafe_allow_html=True)
 
@@ -528,7 +758,7 @@ with col1:
     st.metric("Neighborhoods", f"{len(month_data)}")
 with col2:
     avg_val = month_data["display_value"].mean()
-    label = "Avg Predicted" if is_prediction_view else "Avg ED Visits"
+    label = "Avg Fitted Prediction"
     st.metric(label, f"{avg_val:.1f}")
 with col3:
     severe_count = (month_data["risk_level"] == "Severe").sum()
@@ -538,21 +768,8 @@ with col4:
     st.metric("High Risk", f"{high_count}")
 with col5:
     total_val = month_data["display_value"].sum()
-    label = "Total Predicted" if is_prediction_view else "Total ED Visits"
+    label = "Total Fitted Prediction"
     st.metric(label, f"{total_val:,.0f}")
-
-# If prediction view, also show model accuracy for this month
-if is_prediction_view and month_data["has_prediction"].any():
-    acc_col1, acc_col2, acc_col3, _ = st.columns(4)
-    mae = (month_data["ed_visits"] - month_data["pred"]).abs().mean()
-    corr = month_data[["ed_visits", "pred"]].corr().iloc[0, 1]
-    pct_within = ((month_data["ed_visits"] - month_data["pred"]).abs() / month_data["ed_visits"].clip(lower=1) < 0.15).mean()
-    with acc_col1:
-        st.metric("Prediction Error (MAE)", f"{mae:.2f}")
-    with acc_col2:
-        st.metric("Correlation (r)", f"{corr:.3f}")
-    with acc_col3:
-        st.metric("NTAs within 15%", f"{pct_within:.0%}")
 
 
 # ── Main layout: Map + Detail ───────────────────────────────────────────────
@@ -563,7 +780,7 @@ if "selected_nta" not in st.session_state:
 map_col, detail_col = st.columns([3, 2])
 
 with map_col:
-    st.markdown("### Neighborhood Risk Map")
+    st.markdown('<div class="panel-heading panel-heading-map">Neighborhood Risk Map</div>', unsafe_allow_html=True)
 
     choropleth = build_choropleth(geojson_data, month_data, "display_value", st.session_state.selected_nta)
     map_output = st_folium(choropleth, width=None, height=640, returned_objects=["last_object_clicked_tooltip"])
@@ -589,6 +806,7 @@ with map_col:
 
 
 with detail_col:
+    st.markdown('<div class="panel-heading panel-heading-detail">Select a Neighborhood</div>', unsafe_allow_html=True)
     if st.session_state.selected_nta:
         nta_code = st.session_state.selected_nta
         nta_row = month_data[month_data["nta_code"] == nta_code]
@@ -602,16 +820,16 @@ with detail_col:
                 diff = nta["pred"] - nta["ed_visits"]
                 diff_pct = diff / nta["ed_visits"] * 100 if nta["ed_visits"] > 0 else 0
                 diff_sign = "+" if diff > 0 else ""
-                pred_actual_html = f"""<div class="stat-row">
-<span class="stat-label">Model Prediction</span>
+                pred_actual_html = f"""<div class="stat-row" style="margin-top: 8px">
+<span class="stat-label">Fitted Prediction</span>
 <span class="stat-value" style="color: #C4501A;">{nta['pred']:.1f}</span>
 </div>
 <div class="stat-row">
-<span class="stat-label">Actual (Observed)</span>
+<span class="stat-label">Observed ED Visits</span>
 <span class="stat-value">{nta['ed_visits']:.1f}</span>
 </div>
 <div class="stat-row">
-<span class="stat-label">Difference</span>
+<span class="stat-label">Fitted Residual</span>
 <span class="stat-value">{diff_sign}{diff:.1f} ({diff_sign}{diff_pct:.0f}%)</span>
 </div>"""
             else:
@@ -649,7 +867,7 @@ with detail_col:
 </div>""", unsafe_allow_html=True)
 
             # 12-month history chart: actual vs predicted
-            st.markdown("#### Actual vs. Predicted")
+            st.markdown("#### Observed vs. Fitted")
             nta_history = merged[merged["nta_code"] == nta_code].sort_values("year_month").tail(24)
 
             if not nta_history.empty:
@@ -666,7 +884,7 @@ with detail_col:
                 if not nta_with_preds.empty:
                     fig.add_trace(go.Scatter(
                         x=nta_with_preds["year_month"], y=nta_with_preds["pred"],
-                        mode="lines+markers", name="Predicted",
+                        mode="lines+markers", name="Fitted prediction",
                         line=dict(color="#C4501A", width=2.5),
                         marker=dict(size=6, color="#C4501A", symbol="diamond"),
                     ))
@@ -687,11 +905,8 @@ with detail_col:
     else:
         st.markdown("""
         <div class="detail-panel" style="text-align: center; padding: 60px 24px;">
-            <div style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 8px;">
-                Select a Neighborhood
-            </div>
             <div style="font-family: 'DM Sans', sans-serif; font-size: 0.85rem; color: var(--text-muted);">
-                Click on a colored area on the map to view<br>predicted vs. actual ED visits, trends, and local context.
+                Click on a colored area on the map to view<br>observed vs. fitted ED visits, trends, and local context.
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -734,7 +949,7 @@ st.markdown("""
 <div class="footer">
     <strong>Pollen & Pain</strong> — Forecasting Neighborhood-Level Asthma Emergency Department Surges in New York City<br>
     Data sources: NYC DOHMH Syndromic Surveillance, AAAAI National Allergy Bureau, Open-Meteo, EPA AQS, NYC Street Tree Census, NYC 311<br>
-    Model: XGBoost regression · Walk-forward CV · MAE 2.33 · Pearson r 0.955 · 86.8% NTAs within 15% error<br>
+    Model evaluation: 4-fold walk-forward CV · Full-period dashboard uses fitted predictions from the final model trained on all available data<br>
     Built by Saketh Boddu, Andre Nguyen, and Nam Lai
 </div>
 """, unsafe_allow_html=True)

@@ -15,6 +15,8 @@ FEATURE_COLS = [
 ]
 
 TARGET = "ed_visits"
+POLLEN_SEASON_MONTHS = tuple(range(3, 11))
+REQUIRED_MODEL_FEATURES = ["pollen_composite_avg", "temp_max_mean"]
 
 
 def walk_forward_splits(df: pd.DataFrame, n_test_months: int = 6):
@@ -45,7 +47,20 @@ def standard_scale(X_train: pd.DataFrame, X_test: pd.DataFrame):
     return (X_train - mu) / sigma, (X_test - mu) / sigma
 
 
-def load_modeling_table(path: str = "./data/processed/modeling_table.csv") -> pd.DataFrame:
+def filter_pollen_season(df: pd.DataFrame, year_month_col: str = "year_month") -> pd.DataFrame:
+    """Keep only March-October rows, matching the pollen monitoring season."""
+    year_month = pd.to_datetime(df[year_month_col] + "-01")
+    return df[year_month.dt.month.isin(POLLEN_SEASON_MONTHS)].copy()
+
+
+def load_modeling_table(
+    path: str = "./data/processed/modeling_table.csv",
+    season_only: bool = True,
+    require_complete_features: bool = True,
+) -> pd.DataFrame:
     df = pd.read_csv(path)
-    df = df.dropna(subset=["pollen_composite_avg", "temp_max_mean"])
+    if season_only:
+        df = filter_pollen_season(df)
+    if require_complete_features:
+        df = df.dropna(subset=REQUIRED_MODEL_FEATURES)
     return df
