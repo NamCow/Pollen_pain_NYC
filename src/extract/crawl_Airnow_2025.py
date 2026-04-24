@@ -57,7 +57,7 @@ def get_airnow_nyc_monthly_2025() -> pd.DataFrame:
 
     print(f"Downloading: {start.strftime('%Y-%m-%d')} → {end.strftime('%Y-%m-%d')}")
     print(f"Total days : {(end - start).days + 1}\n")
-
+    
     while current <= end:
         df_day = fetch_one_day(current)
         if not df_day.empty:

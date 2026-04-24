@@ -17,8 +17,8 @@ PROCESSED = Path("./data/processed")
 import os
 from dotenv import load_dotenv
 
-# Try to load .env from the parent directory
-load_dotenv(Path(__file__).parent.parent.parent.parent / ".env")
+REPO_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(REPO_ROOT / ".env")
 
 DB_PARAMS = dict(
     dbname=os.environ.get("DB_NAME", "postgres"),
@@ -26,7 +26,7 @@ DB_PARAMS = dict(
     password=os.environ.get("DB_PASSWORD", ""),
     host=os.environ.get("DB_HOST", "localhost"),
     port=int(os.environ.get("DB_PORT", 5432)),
-    sslmode="require",
+    sslmode="require" if os.environ.get("DB_HOST") not in (None, "", "localhost", "127.0.0.1") else "prefer",
 )
 
 
@@ -97,9 +97,15 @@ def main():
 
         # 8. Model predictions & feature importance (load if they exist)
         models_dir = Path("./data/models")
-        preds_path = models_dir / "xgboost_predictions.csv"
-        if preds_path.exists():
-            preds = pd.read_csv(preds_path)
+        final_preds_path = models_dir / "final_predictions.csv"
+        cv_preds_path = models_dir / "xgboost_predictions.csv"
+        if final_preds_path.exists():
+            preds = pd.read_csv(final_preds_path)
+            preds = preds.rename(columns={"NTAName": "nta_name"})
+            preds = preds[["nta_code", "borough", "year_month", "ed_visits", "pred", "fold"]]
+            load_df(cur, "pollen.model_predictions", preds)
+        elif cv_preds_path.exists():
+            preds = pd.read_csv(cv_preds_path)
             preds = preds[["nta_code", "borough", "year_month", "ed_visits", "pred", "fold"]]
             load_df(cur, "pollen.model_predictions", preds)
 
