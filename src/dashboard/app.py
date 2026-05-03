@@ -162,8 +162,20 @@ div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
 .feature-bar-fill { background: var(--accent-warm); border-radius: 2px; height: 6px; position: absolute; top: 0; left: 0; }
 
 .footer {
-    margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border);
-    font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--text-muted); line-height: 1.6;
+    margin-top: 3rem; padding: 2rem 2.5rem;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.92rem; color: var(--text-secondary); line-height: 1.8;
+}
+.footer strong {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.1rem; color: var(--text-primary);
+}
+.footer-row {
+    display: flex; flex-wrap: wrap; gap: 8px 32px;
+    margin-top: 8px;
+}
+.footer-item {
+    font-size: 0.85rem; color: var(--text-muted);
 }
 
 .sidebar-copy {
@@ -232,7 +244,7 @@ div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
 .eval-row-note { font-family: 'DM Sans', sans-serif; font-size: 0.72rem; color: var(--text-muted); }
 .eval-section-intro {
     font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
-    color: var(--text-secondary); margin-bottom: 1rem; max-width: 760px;
+    color: var(--text-secondary); margin-bottom: 1rem;
     line-height: 1.6;
 }
 .eval-badge {
@@ -277,7 +289,7 @@ import os
 from dotenv import load_dotenv
 
 # Load .env securely from the true directory
-load_dotenv(Path(__file__).parent.parent.parent.parent / ".env")
+load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env")
 
 DB_PARAMS = dict(
     dbname=os.environ.get("DB_NAME", "pollen_pain"),
@@ -676,53 +688,6 @@ if selected_risk != "All Levels":
     month_data = month_data[month_data["risk_level"] == selected_risk]
 
 
-# ── Pollen strip ─────────────────────────────────────────────────────────────
-
-pollen_row = pollen_monthly[pollen_monthly["year_month"] == selected_month]
-
-if not pollen_row.empty:
-    pr = pollen_row.iloc[0]
-    st.markdown(f"""
-    <div class="pollen-strip">
-        <div class="pollen-strip-title">Pollen Index · {pd.Timestamp(selected_month + "-01").strftime("%B %Y")} · City-Wide</div>
-        <div>
-            <span class="pollen-category">
-                <span class="pollen-label" style="color: var(--pollen-tree);">● Tree</span>
-                <span class="pollen-value" style="color: var(--pollen-tree);"> {pr['tree_avg']:.0f}</span>
-            </span>
-            <span class="pollen-category">
-                <span class="pollen-label" style="color: var(--pollen-weed);">● Weed</span>
-                <span class="pollen-value" style="color: var(--pollen-weed);"> {pr['weed_avg']:.1f}</span>
-            </span>
-            <span class="pollen-category">
-                <span class="pollen-label" style="color: var(--pollen-grass);">● Grass</span>
-                <span class="pollen-value" style="color: var(--pollen-grass);"> {pr['grass_avg']:.1f}</span>
-            </span>
-            <span class="pollen-category">
-                <span class="pollen-label" style="color: var(--pollen-mold);">● Mold</span>
-                <span class="pollen-value" style="color: var(--pollen-mold);"> {pr['mold_avg']:.1f}</span>
-            </span>
-            <span class="pollen-category" style="margin-left: 20px; padding-left: 20px; border-left: 1px solid var(--border);">
-                <span class="pollen-label">Composite</span>
-                <span class="pollen-value" style="color: var(--accent-warm);"> {pr['pollen_composite_avg']:.0f}</span>
-                <span class="pollen-label" style="font-size: 0.72rem;"> avg</span>
-                <span class="pollen-value" style="color: var(--accent-warm);"> {pr['pollen_composite_max']:.0f}</span>
-                <span class="pollen-label" style="font-size: 0.72rem;"> peak</span>
-            </span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-else:
-    st.markdown("""
-    <div class="pollen-strip">
-        <div class="pollen-strip-title">Pollen Index · Off-Season</div>
-        <div style="font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--text-muted);">
-            No pollen data for this month — outside monitoring season (March–October)
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-
 # ── Header + source indicator ────────────────────────────────────────────────
 
 display_month = pd.Timestamp(selected_month + "-01").strftime("%B %Y")
@@ -923,7 +888,7 @@ with detail_col:
 
 st.markdown("## What's Driving Predictions")
 st.markdown("""
-<div style="font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1rem; max-width: 640px;">
+<div style="font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1rem;">
     Each bar shows how much a given factor contributes to the model's predictions.
     Neighborhood asthma prevalence is the strongest signal; pollen at 4-week lag is the
     second most important — confirming the delayed relationship between pollen exposure and ED surges.
@@ -1222,9 +1187,21 @@ footer_eval_label = (
 )
 st.markdown(f"""
 <div class="footer">
-    <strong>Pollen & Pain</strong> — Forecasting Neighborhood-Level Asthma Emergency Department Surges in New York City<br>
-    Data sources: NYC DOHMH Syndromic Surveillance, AAAAI National Allergy Bureau, Open-Meteo, EPA AQS, NYC Street Tree Census, NYC 311<br>
-    Model evaluation: {footer_eval_label} · Full-period dashboard uses fitted predictions from the final model trained on all available data<br>
-    Built by Saketh Boddu, Andre Nguyen, and Nam Lai
+    <strong>Pollen & Pain</strong>
+    <div style="margin-top: 4px;">Forecasting Neighborhood-Level Asthma Emergency Department Surges in New York City</div>
+    <div class="footer-row">
+        <span class="footer-item">NYC DOHMH Syndromic Surveillance</span>
+        <span class="footer-item">AAAAI National Allergy Bureau</span>
+        <span class="footer-item">Open-Meteo</span>
+        <span class="footer-item">EPA AQS</span>
+        <span class="footer-item">NYC Street Tree Census</span>
+        <span class="footer-item">NYC 311</span>
+    </div>
+    <div style="margin-top: 8px;">
+        Model evaluation: {footer_eval_label} · Full-period dashboard uses fitted predictions from the final model trained on all available data
+    </div>
+    <div style="margin-top: 8px; font-weight: 500; color: var(--text-primary);">
+        Built by Saketh Boddu, Andre Nguyen, and Nam Lai
+    </div>
 </div>
 """, unsafe_allow_html=True)
