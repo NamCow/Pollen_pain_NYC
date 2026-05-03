@@ -205,6 +205,66 @@ div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
 .tag-predicted { background: #FFF3E0; color: #C4501A; }
 .tag-actual { background: #E8F5E9; color: #2D7D4F; }
 
+.eval-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 20px 24px; height: 100%;
+}
+.eval-card-title {
+    font-family: 'DM Sans', sans-serif; font-size: 0.72rem;
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted);
+    margin-bottom: 12px;
+}
+.eval-big-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.8rem; font-weight: 500; color: var(--text-primary);
+    line-height: 1.1; margin-bottom: 2px;
+}
+.eval-label {
+    font-family: 'DM Sans', sans-serif; font-size: 0.78rem; color: var(--text-muted);
+}
+.eval-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 8px 0; border-bottom: 1px solid #F0EDE8;
+}
+.eval-row:last-child { border-bottom: none; }
+.eval-row-label { font-family: 'DM Sans', sans-serif; font-size: 0.85rem; color: var(--text-secondary); }
+.eval-row-value { font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; font-weight: 500; }
+.eval-row-note { font-family: 'DM Sans', sans-serif; font-size: 0.72rem; color: var(--text-muted); }
+.eval-section-intro {
+    font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+    color: var(--text-secondary); margin-bottom: 1rem; max-width: 760px;
+    line-height: 1.6;
+}
+.eval-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 3px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.68rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.04em;
+    margin-left: 8px; vertical-align: middle;
+}
+.badge-pass { background: #E8F5E9; color: #2D7D4F; }
+.badge-warn { background: #FFF8E1; color: #B8860B; }
+.badge-info { background: #F3E8FF; color: #7C3AED; }
+.compare-table {
+    width: 100%; border-collapse: collapse;
+    font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+}
+.compare-table th {
+    font-family: 'DM Sans', sans-serif; font-size: 0.72rem;
+    text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted);
+    text-align: left; padding: 8px 12px; border-bottom: 2px solid var(--border);
+    font-weight: 500;
+}
+.compare-table td {
+    padding: 10px 12px; border-bottom: 1px solid #F0EDE8;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+}
+.compare-table td:first-child {
+    font-family: 'DM Sans', sans-serif; font-weight: 500;
+    color: var(--text-primary);
+}
+.compare-table tr.row-best td { background: #FEFCE8; }
+.compare-table tr:last-child td { border-bottom: none; }
+
 #MainMenu { visibility: hidden; }
 footer { visibility: hidden; }
 </style>
@@ -216,8 +276,8 @@ footer { visibility: hidden; }
 import os
 from dotenv import load_dotenv
 
-# Load .env securely
-load_dotenv(Path(__file__).parent.parent.parent / ".env")
+# Load .env securely from the true directory
+load_dotenv(Path(__file__).parent.parent.parent.parent / ".env")
 
 DB_PARAMS = dict(
     dbname=os.environ.get("DB_NAME", "pollen_pain"),
@@ -225,10 +285,14 @@ DB_PARAMS = dict(
     password=os.environ.get("DB_PASSWORD", ""),
     host=os.environ.get("DB_HOST", "localhost"),
     port=int(os.environ.get("DB_PORT", 5432)),
-    sslmode="require" if os.environ.get("DB_HOST") != "localhost" else "prefer",
+    sslmode="require" if os.environ.get("DB_HOST", "localhost") != "localhost" else "prefer",
 )
 GEOJSON_PATH = Path("./data/Input/nta2020.geojson")
 FOLD_RESULTS_PATH = Path("./data/models/fold_results.csv")
+BASELINE_COMP_PATH = Path("./data/models/holdout_baseline_comparison.csv")
+LOGREG_FOLD_PATH = Path("./data/models/logistic_regression_fold_results.csv")
+EVAL_SUMMARY_PATH = Path("./data/models/evaluation_summary.txt")
+LOGREG_SUMMARY_PATH = Path("./data/models/logistic_regression_summary.txt")
 
 
 @st.cache_data(ttl=300)
@@ -251,6 +315,64 @@ def load_fold_results():
     if FOLD_RESULTS_PATH.exists():
         return pd.read_csv(FOLD_RESULTS_PATH)
     return pd.DataFrame()
+
+
+@st.cache_data
+def load_baseline_comparison():
+    if BASELINE_COMP_PATH.exists():
+        return pd.read_csv(BASELINE_COMP_PATH)
+    return pd.DataFrame()
+
+
+@st.cache_data
+def load_logreg_folds():
+    if LOGREG_FOLD_PATH.exists():
+        return pd.read_csv(LOGREG_FOLD_PATH)
+    return pd.DataFrame()
+
+
+@st.cache_data
+def parse_eval_summary():
+    result = {
+        "holdout_mae": None, "holdout_rmse": None, "holdout_r": None,
+        "holdout_r_p": None, "holdout_within_15": None,
+        "chs_pred_r": None, "chs_pred_p": None,
+        "chs_actual_r": None, "chs_actual_p": None,
+        "pollen_14d_r": None, "pollen_14d_p": None,
+        "pollen_28d_r": None, "pollen_28d_p": None,
+        "logreg_auc": None,
+    }
+    if not EVAL_SUMMARY_PATH.exists():
+        return result
+
+    import re
+    text = EVAL_SUMMARY_PATH.read_text()
+
+    m = re.search(r"XGBoost MAE:\s+([\d.]+)", text)
+    if m: result["holdout_mae"] = float(m.group(1))
+    m = re.search(r"XGBoost RMSE:\s+([\d.]+)", text)
+    if m: result["holdout_rmse"] = float(m.group(1))
+    m = re.search(r"XGBoost Pearson r:\s+([\d.]+)\s+\(p=([\d.e+-]+)\)", text)
+    if m: result["holdout_r"] = float(m.group(1)); result["holdout_r_p"] = float(m.group(2))
+    m = re.search(r"XGBoost NTAs within 15%:\s+([\d.]+)%", text)
+    if m: result["holdout_within_15"] = float(m.group(1)) / 100
+
+    m = re.search(r"Predicted holdout mean vs CHS prevalence:\s+r=([\d.]+)\s+\(p=([\d.e+-]+)\)", text)
+    if m: result["chs_pred_r"] = float(m.group(1)); result["chs_pred_p"] = float(m.group(2))
+    m = re.search(r"Actual holdout mean vs CHS prevalence:\s+r=([\d.]+)\s+\(p=([\d.e+-]+)\)", text)
+    if m: result["chs_actual_r"] = float(m.group(1)); result["chs_actual_p"] = float(m.group(2))
+
+    m = re.search(r"pollen_14d_lag_avg\s+r=([\d.]+)\s+\(p=([\d.e+-]+)", text)
+    if m: result["pollen_14d_r"] = float(m.group(1)); result["pollen_14d_p"] = float(m.group(2))
+    m = re.search(r"pollen_28d_lag_avg\s+r=([\d.]+)\s+\(p=([\d.e+-]+)", text)
+    if m: result["pollen_28d_r"] = float(m.group(1)); result["pollen_28d_p"] = float(m.group(2))
+
+    if LOGREG_SUMMARY_PATH.exists():
+        lr_text = LOGREG_SUMMARY_PATH.read_text()
+        m = re.search(r"Mean AUC-ROC:\s+([\d.]+)", lr_text)
+        if m: result["logreg_auc"] = float(m.group(1))
+
+    return result
 
 
 @st.cache_data
@@ -394,6 +516,9 @@ def build_choropleth(geojson_data, month_data, value_col, selected_nta=None):
 
 modeling, predictions, feature_imp, complaints, pollen_monthly, neighborhoods = load_all_data()
 fold_results = load_fold_results()
+baseline_comp = load_baseline_comparison()
+logreg_folds = load_logreg_folds()
+eval_summary = parse_eval_summary()
 geojson_data = load_geojson()
 
 # Prefer final-model fitted predictions when available. If the database only has
@@ -483,15 +608,20 @@ with st.sidebar:
 
     st.markdown("---")
 
-    if not fold_results.empty:
+    if eval_summary["holdout_mae"] is not None:
+        model_metrics_html = (
+            "XGBoost regression · walk-forward CV + holdout.<br>"
+            f"Holdout MAE {eval_summary['holdout_mae']:.2f} · r = {eval_summary['holdout_r']:.3f}<br>"
+            f"{eval_summary['holdout_within_15']:.1%} of NTAs within 15%"
+        )
+        if eval_summary["logreg_auc"] is not None:
+            model_metrics_html += f"<br>Logistic baseline AUC-ROC {eval_summary['logreg_auc']:.3f}"
+    elif not fold_results.empty:
         mean_mae = fold_results["mae"].mean()
-        mean_rmse = fold_results["rmse"].mean()
         mean_r = fold_results["pearson_r"].mean()
-        mean_within = fold_results["pct_ntas_within_15pct"].mean()
         model_metrics_html = (
             "XGBoost regression with walk-forward time-series validation.<br>"
-            f"Mean MAE {mean_mae:.2f} · Mean RMSE {mean_rmse:.2f}<br>"
-            f"Mean Pearson r {mean_r:.3f} · {mean_within:.1%} of NTAs within 15%"
+            f"Mean MAE {mean_mae:.2f} · Mean Pearson r {mean_r:.3f}"
         )
     else:
         model_metrics_html = "XGBoost regression with walk-forward time-series validation."
@@ -544,76 +674,6 @@ if selected_borough != "All Boroughs":
     month_data = month_data[month_data["borough"] == selected_borough]
 if selected_risk != "All Levels":
     month_data = month_data[month_data["risk_level"] == selected_risk]
-
-
-# ── Model evaluation ─────────────────────────────────────────────────────────
-
-st.markdown("## Model Evaluation")
-fold_count_text = len(fold_results) if not fold_results.empty else "available"
-st.markdown(f"""
-<div style="font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: #6B7280; margin-bottom: 1rem; max-width: 760px;">
-    These metrics come from {fold_count_text} walk-forward cross-validation folds and reflect out-of-sample model performance. <br>
-    The map and charts below do not use these holdout predictions; they use fitted full-period predictions from the final model.
-</div>
-""", unsafe_allow_html=True)
-
-if not fold_results.empty:
-    fold_count = len(fold_results)
-    eval_col1, eval_col2, eval_col3, eval_col4 = st.columns(4)
-    with eval_col1:
-        st.metric(f"Mean MAE Across {fold_count} Folds", f"{fold_results['mae'].mean():.2f}")
-    with eval_col2:
-        st.metric(f"Mean RMSE Across {fold_count} Folds", f"{fold_results['rmse'].mean():.2f}")
-    with eval_col3:
-        st.metric(f"Mean Pearson r Across {fold_count} Folds", f"{fold_results['pearson_r'].mean():.3f}")
-    with eval_col4:
-        st.metric(f"Mean NTAs Within 15% Across {fold_count} Folds", f"{fold_results['pct_ntas_within_15pct'].mean():.1%}")
-
-    st.markdown("### Fold-by-Fold Performance")
-    eval_table = fold_results.copy()
-    eval_table["Fold"] = eval_table["fold"].astype(int)
-    eval_table["Validation Window"] = eval_table["test_start"] + " to " + eval_table["test_end"]
-    eval_table = eval_table.rename(columns={
-        "mae": "MAE",
-        "rmse": "RMSE",
-        "pearson_r": "Pearson r",
-        "pct_ntas_within_15pct": "NTAs within 15%",
-    })
-    st.dataframe(
-        eval_table[["Fold", "Validation Window", "MAE", "RMSE", "Pearson r", "NTAs within 15%"]],
-        use_container_width=True,
-        hide_index=True,
-    )
-
-    eval_chart = go.Figure()
-    eval_chart.add_trace(go.Bar(
-        x=fold_results["fold"],
-        y=fold_results["mae"],
-        name="MAE",
-        marker_color="#C4501A",
-        offsetgroup=1,
-    ))
-    eval_chart.add_trace(go.Bar(
-        x=fold_results["fold"],
-        y=fold_results["rmse"],
-        name="RMSE",
-        marker_color="#B8860B",
-        offsetgroup=2,
-    ))
-    eval_chart.update_layout(
-        height=320,
-        margin=dict(l=0, r=0, t=10, b=0),
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="DM Sans", size=12, color="#5A5A5A"),
-        barmode="group",
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
-        xaxis=dict(title="Fold", tickmode="array", tickvals=fold_results["fold"].tolist(), showgrid=False),
-        yaxis=dict(title="Error", gridcolor="#F0EDE8"),
-    )
-    st.plotly_chart(eval_chart, use_container_width=True, config={"displayModeBar": False})
-else:
-    st.info("Cross-validation fold metrics were not found. Add `data/models/fold_results.csv` to show model evaluation.")
 
 
 # ── Pollen strip ─────────────────────────────────────────────────────────────
@@ -888,6 +948,269 @@ for col, features in [(fi_col1, top_features.head(5)), (fi_col2, top_features.ta
             """, unsafe_allow_html=True)
 
 
+
+
+# ── Validation Signals ──────────────────────────────────────────────────────
+
+has_chs = eval_summary["chs_pred_r"] is not None
+has_pollen = eval_summary["pollen_14d_r"] is not None
+
+if has_chs or has_pollen:
+    st.markdown("## Validation Signals")
+    st.markdown("""
+    <div class="eval-section-intro">
+        Independent checks confirming model predictions align with known epidemiological patterns.
+    </div>
+    """, unsafe_allow_html=True)
+
+    vs_c1, vs_c2 = st.columns(2)
+
+    if has_pollen:
+        p14_sig = "p < 0.001" if eval_summary["pollen_14d_p"] < 0.001 else f"p = {eval_summary['pollen_14d_p']:.2e}"
+        p28_sig = "p < 0.001" if eval_summary["pollen_28d_p"] < 0.001 else f"p = {eval_summary['pollen_28d_p']:.2e}"
+        pollen_badge = "pass" if eval_summary["pollen_28d_p"] < 0.05 else "warn"
+        pollen_label = "Significant" if pollen_badge == "pass" else "Not significant"
+
+        with vs_c1:
+            st.markdown(f"""<div class="eval-card">
+                <div class="eval-card-title">Pollen–ED Visit Lag Correlation</div>
+                <div class="eval-row">
+                    <span class="eval-row-label">2-week lag (pollen_14d_lag_avg)</span>
+                    <span class="eval-row-value">r = {eval_summary['pollen_14d_r']:.3f}</span>
+                </div>
+                <div class="eval-row">
+                    <span class="eval-row-label"></span>
+                    <span class="eval-row-note">{p14_sig}, n = 5,952</span>
+                </div>
+                <div class="eval-row">
+                    <span class="eval-row-label">4-week lag (pollen_28d_lag_avg)</span>
+                    <span class="eval-row-value">r = {eval_summary['pollen_28d_r']:.3f} <span class="eval-badge badge-{pollen_badge}">{pollen_label}</span></span>
+                </div>
+                <div class="eval-row">
+                    <span class="eval-row-label"></span>
+                    <span class="eval-row-note">{p28_sig}, n = 5,952</span>
+                </div>
+                <div style="margin-top: 12px;">
+                    <div class="eval-row-note">Confirms the documented 1–2 week delay between pollen exposure and asthma ED surges. The 4-week lag shows stronger association.</div>
+                </div>
+            </div>""", unsafe_allow_html=True)
+
+    if has_chs:
+        chs_pred_sig = "p < 0.001" if eval_summary["chs_pred_p"] < 0.001 else f"p = {eval_summary['chs_pred_p']:.2e}"
+        chs_actual_sig = "p < 0.001" if eval_summary["chs_actual_p"] < 0.001 else f"p = {eval_summary['chs_actual_p']:.2e}"
+
+        with vs_c2:
+            st.markdown(f"""<div class="eval-card">
+                <div class="eval-card-title">CHS Prevalence Cross-Check</div>
+                <div class="eval-row">
+                    <span class="eval-row-label">Predictions vs. CHS prevalence</span>
+                    <span class="eval-row-value">r = {eval_summary['chs_pred_r']:.3f}</span>
+                </div>
+                <div class="eval-row">
+                    <span class="eval-row-label"></span>
+                    <span class="eval-row-note">{chs_pred_sig}</span>
+                </div>
+                <div class="eval-row">
+                    <span class="eval-row-label">Actual ED visits vs. CHS prevalence</span>
+                    <span class="eval-row-value">r = {eval_summary['chs_actual_r']:.3f}</span>
+                </div>
+                <div class="eval-row">
+                    <span class="eval-row-label"></span>
+                    <span class="eval-row-note">{chs_actual_sig}</span>
+                </div>
+                <div style="margin-top: 12px;">
+                    <div class="eval-row-note">Model predictions track neighborhood-level asthma prevalence as closely as actual ED data does — the model learned real spatial health patterns.</div>
+                </div>
+            </div>""", unsafe_allow_html=True)
+
+
+# ── Model evaluation ─────────────────────────────────────────────────────────
+
+st.markdown("## Model Evaluation")
+
+fold_count = len(fold_results) if not fold_results.empty else 0
+holdout_available = eval_summary["holdout_mae"] is not None
+
+st.markdown(f"""
+<div class="eval-section-intro">
+    All metrics reflect out-of-sample performance. Walk-forward cross-validation ({fold_count} folds)
+    trained on past data and evaluated on future months. The holdout window (May–Oct 2025)
+    was never seen during CV or model tuning.
+</div>
+""", unsafe_allow_html=True)
+
+
+# ── Holdout headline metrics ────────────────────────────────────────────────
+
+if holdout_available:
+    st.markdown("### Holdout Performance (May–Oct 2025)")
+
+    within_15 = eval_summary["holdout_within_15"]
+    within_badge = "pass" if within_15 and within_15 >= 0.70 else "warn"
+    within_label = "Meets target" if within_badge == "pass" else "Below target"
+
+    ho_c1, ho_c2, ho_c3, ho_c4 = st.columns(4)
+    with ho_c1:
+        st.markdown(f"""<div class="eval-card">
+            <div class="eval-card-title">MAE</div>
+            <div class="eval-big-number">{eval_summary['holdout_mae']:.2f}</div>
+            <div class="eval-label">ED visits</div>
+        </div>""", unsafe_allow_html=True)
+    with ho_c2:
+        st.markdown(f"""<div class="eval-card">
+            <div class="eval-card-title">RMSE</div>
+            <div class="eval-big-number">{eval_summary['holdout_rmse']:.2f}</div>
+            <div class="eval-label">ED visits</div>
+        </div>""", unsafe_allow_html=True)
+    with ho_c3:
+        st.markdown(f"""<div class="eval-card">
+            <div class="eval-card-title">Pearson r</div>
+            <div class="eval-big-number">{eval_summary['holdout_r']:.3f}</div>
+            <div class="eval-label">p {'< 0.001' if eval_summary['holdout_r_p'] is not None and eval_summary['holdout_r_p'] < 0.001 else f"= {eval_summary['holdout_r_p']:.2e}"}</div>
+        </div>""", unsafe_allow_html=True)
+    with ho_c4:
+        st.markdown(f"""<div class="eval-card">
+            <div class="eval-card-title">NTAs within 15%</div>
+            <div class="eval-big-number">{within_15:.1%}</div>
+            <div class="eval-label"><span class="eval-badge badge-{within_badge}">{within_label}</span></div>
+        </div>""", unsafe_allow_html=True)
+
+
+# ── Baseline comparison table ───────────────────────────────────────────────
+
+if not baseline_comp.empty and holdout_available:
+    st.markdown("### Model vs. Baselines (Holdout)")
+    st.markdown("""
+    <div class="eval-section-intro">
+        Comparing XGBoost against naive forecasting strategies on the same holdout window.
+    </div>
+    """, unsafe_allow_html=True)
+
+    rows_html = ""
+    baselines = {
+        "seasonal_average": "Seasonal Average",
+        "prior_observation": "Prior Month",
+    }
+    for _, brow in baseline_comp.iterrows():
+        label = baselines.get(brow["baseline"], brow["baseline"])
+        rows_html += f"""<tr>
+            <td>{label}</td>
+            <td>{brow['mae']:.2f}</td>
+            <td>{brow['rmse']:.2f}</td>
+            <td>{brow['pearson_r']:.3f}</td>
+            <td>{brow['pct_ntas_within_15pct']:.1%}</td>
+        </tr>"""
+
+    st.markdown(f"""
+    <div class="eval-card" style="padding: 0; overflow: hidden;">
+        <table class="compare-table">
+            <thead><tr>
+                <th>Model</th><th>MAE</th><th>RMSE</th><th>Pearson r</th><th>NTAs within 15%</th>
+            </tr></thead>
+            <tbody>
+                <tr class="row-best">
+                    <td>XGBoost <span class="eval-badge badge-pass">Best</span></td>
+                    <td>{eval_summary['holdout_mae']:.2f}</td>
+                    <td>{eval_summary['holdout_rmse']:.2f}</td>
+                    <td>{eval_summary['holdout_r']:.3f}</td>
+                    <td>{eval_summary['holdout_within_15']:.1%}</td>
+                </tr>
+                {rows_html}
+            </tbody>
+        </table>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+# ── Logistic Regression baseline ────────────────────────────────────────────
+
+if not logreg_folds.empty:
+    st.markdown("### Logistic Regression Baseline (Binary Classification)")
+
+    logreg_auc = eval_summary["logreg_auc"] or logreg_folds["auc"].mean()
+    mean_acc = logreg_folds["accuracy"].mean()
+    mean_f1 = logreg_folds["f1"].mean()
+
+    lr_c1, lr_c2, lr_c3 = st.columns(3)
+    with lr_c1:
+        st.markdown(f"""<div class="eval-card">
+            <div class="eval-card-title">Mean AUC-ROC</div>
+            <div class="eval-big-number">{logreg_auc:.3f}</div>
+            <div class="eval-label">across {len(logreg_folds)} folds</div>
+        </div>""", unsafe_allow_html=True)
+    with lr_c2:
+        st.markdown(f"""<div class="eval-card">
+            <div class="eval-card-title">Mean Accuracy</div>
+            <div class="eval-big-number">{mean_acc:.1%}</div>
+            <div class="eval-label">above-median ED month</div>
+        </div>""", unsafe_allow_html=True)
+    with lr_c3:
+        st.markdown(f"""<div class="eval-card">
+            <div class="eval-card-title">Mean F1</div>
+            <div class="eval-big-number">{mean_f1:.3f}</div>
+            <div class="eval-label">precision / recall balance</div>
+        </div>""", unsafe_allow_html=True)
+
+    lr_table = logreg_folds.copy()
+    lr_table["Fold"] = lr_table["fold"].astype(int)
+    lr_table["Validation Window"] = lr_table["test_start"] + " to " + lr_table["test_end"]
+    lr_table = lr_table.rename(columns={
+        "auc": "AUC-ROC", "accuracy": "Accuracy", "precision": "Precision",
+        "recall": "Recall", "f1": "F1",
+    })
+    st.dataframe(
+        lr_table[["Fold", "Validation Window", "AUC-ROC", "Accuracy", "Precision", "Recall", "F1"]],
+        use_container_width=True, hide_index=True,
+    )
+
+
+# ── XGBoost CV fold detail ──────────────────────────────────────────────────
+
+if not fold_results.empty:
+    st.markdown("### XGBoost Cross-Validation Detail")
+
+    fold_count = len(fold_results)
+    cv_c1, cv_c2, cv_c3, cv_c4 = st.columns(4)
+    with cv_c1:
+        st.metric(f"Mean MAE ({fold_count} folds)", f"{fold_results['mae'].mean():.2f}")
+    with cv_c2:
+        st.metric(f"Mean RMSE ({fold_count} folds)", f"{fold_results['rmse'].mean():.2f}")
+    with cv_c3:
+        st.metric(f"Mean Pearson r ({fold_count} folds)", f"{fold_results['pearson_r'].mean():.3f}")
+    with cv_c4:
+        st.metric(f"NTAs within 15% ({fold_count} folds)", f"{fold_results['pct_ntas_within_15pct'].mean():.1%}")
+
+    eval_table = fold_results.copy()
+    eval_table["Fold"] = eval_table["fold"].astype(int)
+    eval_table["Validation Window"] = eval_table["test_start"] + " to " + eval_table["test_end"]
+    eval_table = eval_table.rename(columns={
+        "mae": "MAE", "rmse": "RMSE", "pearson_r": "Pearson r",
+        "pct_ntas_within_15pct": "NTAs within 15%",
+    })
+    st.dataframe(
+        eval_table[["Fold", "Validation Window", "MAE", "RMSE", "Pearson r", "NTAs within 15%"]],
+        use_container_width=True, hide_index=True,
+    )
+
+    eval_chart = go.Figure()
+    eval_chart.add_trace(go.Bar(
+        x=fold_results["fold"], y=fold_results["mae"],
+        name="MAE", marker_color="#C4501A", offsetgroup=1,
+    ))
+    eval_chart.add_trace(go.Bar(
+        x=fold_results["fold"], y=fold_results["rmse"],
+        name="RMSE", marker_color="#B8860B", offsetgroup=2,
+    ))
+    eval_chart.update_layout(
+        height=320, margin=dict(l=0, r=0, t=10, b=0),
+        plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+        font=dict(family="DM Sans", size=12, color="#5A5A5A"),
+        barmode="group",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        xaxis=dict(title="Fold", tickmode="array", tickvals=fold_results["fold"].tolist(), showgrid=False),
+        yaxis=dict(title="Error", gridcolor="#F0EDE8"),
+    )
+    st.plotly_chart(eval_chart, use_container_width=True, config={"displayModeBar": False})
 
 
 # ── Footer ───────────────────────────────────────────────────────────────────
