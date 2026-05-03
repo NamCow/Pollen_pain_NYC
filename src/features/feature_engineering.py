@@ -2,6 +2,8 @@
 Feature definitions and engineering utilities shared across training scripts.
 """
 
+import math
+
 import pandas as pd
 
 FEATURE_COLS = [
@@ -12,11 +14,17 @@ FEATURE_COLS = [
     "pm25_mean", "ozone_mean", "no2_mean",
     "tree_count", "total_dbh", "mean_dbh", "pct_good_health",
     "chs_asthma_pct",
+    "month_sin", "month_cos", "season_progress",
+    "temp_diurnal_range", "warm_dry_index",
+    "pollen_change_vs_28d", "pollen_temp_interaction",
+    "pollen_pm25_interaction", "pollen_chs_interaction",
+    "weed_temp_interaction",
 ]
 
 TARGET = "ed_visits"
 POLLEN_SEASON_MONTHS = tuple(range(3, 11))
 REQUIRED_MODEL_FEATURES = ["pollen_composite_avg", "temp_max_mean"]
+MIN_AVG_MONTHLY_ED_VISITS = 12.0
 
 
 def walk_forward_splits(df: pd.DataFrame, n_test_months: int = 6):
@@ -53,14 +61,65 @@ def filter_pollen_season(df: pd.DataFrame, year_month_col: str = "year_month") -
     return df[year_month.dt.month.isin(POLLEN_SEASON_MONTHS)].copy()
 
 
+def add_engineered_features(df: pd.DataFrame, year_month_col: str = "year_month") -> pd.DataFrame:
+    """Create low-leakage derived features from existing monthly signals."""
+    out = df.copy().sort_values(["nta_code", year_month_col]).reset_index(drop=True)
+    year_month = pd.to_datetime(out[year_month_col] + "-01")
+    month = year_month.dt.month
+
+    angle = 2.0 * math.pi * month.astype(float) / 12.0
+    out["month_sin"] = angle.map(math.sin)
+    out["month_cos"] = angle.map(math.cos)
+    out["season_progress"] = (month - min(POLLEN_SEASON_MONTHS)) / (len(POLLEN_SEASON_MONTHS) - 1)
+
+    out["temp_diurnal_range"] = out["temp_max_mean"] - out["temp_min_mean"]
+    out["warm_dry_index"] = out["temp_max_mean"] / (1.0 + out["precip_total"].clip(lower=0))
+    out["pollen_change_vs_28d"] = out["pollen_composite_avg"] - out["pollen_28d_lag_avg"]
+    out["pollen_temp_interaction"] = out["pollen_composite_avg"] * out["temp_max_mean"]
+    out["pollen_pm25_interaction"] = out["pollen_composite_avg"] * out["pm25_mean"]
+    out["pollen_chs_interaction"] = out["pollen_composite_avg"] * out["chs_asthma_pct"]
+    out["weed_temp_interaction"] = out["weed_avg"] * out["temp_max_mean"]
+    return out
+
+
+def filter_low_case_ntas(
+    df: pd.DataFrame,
+    target_col: str = TARGET,
+    nta_col: str = "nta_code",
+    min_avg_monthly_cases: float = MIN_AVG_MONTHLY_ED_VISITS,
+) -> pd.DataFrame:
+    """Drop NTAs whose average monthly ED burden is too small for stable modeling."""
+    nta_mean = df.groupby(nta_col)[target_col].mean()
+    keep_ntas = nta_mean[nta_mean >= min_avg_monthly_cases].index
+    return df[df[nta_col].isin(keep_ntas)].copy()
+
+
+def holdout_split(df: pd.DataFrame, holdout_months: int = 6):
+    """Split rows into development and final holdout windows using the latest months."""
+    months = sorted(df["year_month"].unique())
+    if len(months) <= holdout_months:
+        raise ValueError(
+            f"Need more than {holdout_months} months to create a holdout split; found {len(months)} months."
+        )
+    holdout_window = months[-holdout_months:]
+    dev_window = months[:-holdout_months]
+    dev = df[df["year_month"].isin(dev_window)].copy()
+    holdout = df[df["year_month"].isin(holdout_window)].copy()
+    return dev, holdout, dev_window[-1], holdout_window[0], holdout_window[-1]
+
+
 def load_modeling_table(
     path: str = "./data/processed/modeling_table.csv",
     season_only: bool = True,
     require_complete_features: bool = True,
+    min_avg_monthly_cases: float | None = MIN_AVG_MONTHLY_ED_VISITS,
 ) -> pd.DataFrame:
     df = pd.read_csv(path)
     if season_only:
         df = filter_pollen_season(df)
     if require_complete_features:
         df = df.dropna(subset=REQUIRED_MODEL_FEATURES)
+    if min_avg_monthly_cases is not None:
+        df = filter_low_case_ntas(df, min_avg_monthly_cases=min_avg_monthly_cases)
+    df = add_engineered_features(df)
     return df

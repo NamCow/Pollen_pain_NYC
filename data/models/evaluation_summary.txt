@@ -1,25 +1,43 @@
 === EVALUATION SUMMARY ===
-Total rows: 6,304  NTAs: 197  Months: 32
+Filtered rows: 5,952  NTAs: 186  Months: 32
 Modeling window: 2022-03 to 2025-10
+Development window: 2022-03 to 2025-04
+Holdout window: 2025-05 to 2025-10
+NTA inclusion rule: mean monthly ED visits >= 12
 
---- XGBoost Regression (walk-forward CV) ---
-Mean MAE:  2.56
-Mean RMSE: 3.58
-Mean Pearson r: 0.952
-Mean NTAs within 15%: 83.0%
+--- XGBoost Regression (walk-forward CV on development window) ---
+Folds: 3
+Mean MAE:  2.38
+Mean RMSE: 3.52
+Mean Pearson r: 0.951
+Mean NTAs within 15%: 83.2%
 
---- Logistic Regression Baseline ---
-Mean AUC-ROC: 0.916
-Mean Accuracy: 76.25%
+--- Final Holdout Evaluation ---
+XGBoost MAE:  1.98
+XGBoost RMSE: 2.36
+XGBoost Pearson r: 0.973 (p=0.00e+00)
+XGBoost NTAs within 15%: 85.5%
+
+--- Holdout Baseline Comparison ---
+  seasonal_average  MAE=2.21  RMSE=2.89  Pearson r=0.971  NTAs within 15%=91.4%
+  prior_observation MAE=3.68  RMSE=5.03  Pearson r=0.875  NTAs within 15%=54.3%
+
+--- CHS Cross-Check ---
+Predicted holdout mean vs CHS prevalence: r=0.894 (p=4.87e-66)
+Actual holdout mean vs CHS prevalence:    r=0.888 (p=4.49e-64)
+
+--- Pollen Lag Correlations ---
+  pollen_14d_lag_avg   r=0.098 (p=3.20e-14, n=5952)
+  pollen_28d_lag_avg   r=0.155 (p=2.08e-33, n=5952)
 
 --- Feature Importance (top 10) ---
-  chs_asthma_pct                 0.6899
-  temp_min_mean                  0.0410
-  pollen_28d_lag_avg             0.0383
-  mean_dbh                       0.0325
-  total_dbh                      0.0312
-  pct_good_health                0.0212
-  temp_max_mean                  0.0199
-  pm25_mean                      0.0195
-  pollen_14d_lag_avg             0.0163
-  no2_mean                       0.0156
+  chs_asthma_pct                 0.6691
+  temp_max_mean                  0.0469
+  pm25_mean                      0.0234
+  temp_min_mean                  0.0227
+  mean_dbh                       0.0227
+  tree_avg                       0.0175
+  no2_mean                       0.0152
+  ozone_mean                     0.0148
+  pct_good_health                0.0144
+  pollen_14d_lag_avg             0.0130

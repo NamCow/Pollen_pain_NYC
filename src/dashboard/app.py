@@ -31,7 +31,6 @@ st.markdown("""
 
 :root {
     --bg-warm: #FAF8F5;
-    --panel-bg: #FFFBEB;
     --bg-card: #FFFFFF;
     --text-primary: #1A1A1A;
     --text-secondary: #5A5A5A;
@@ -49,20 +48,8 @@ st.markdown("""
     --pollen-mold: #8B7355;
 }
 
-.stApp,
-html,
-body,
-[data-testid="stAppViewContainer"] {
-    background: var(--panel-bg) !important;
-}
+.stApp { background-color: #F5F2ED !important; }
 .stApp header { background-color: transparent !important; }
-[data-testid="stAppViewContainer"] > .main {
-    background: var(--panel-bg) !important;
-}
-[data-testid="stAppViewContainer"] > .main > div,
-.block-container {
-    background: transparent !important;
-}
 
 h1, h2, h3, h4 {
     font-family: 'Playfair Display', Georgia, 'Times New Roman', serif !important;
@@ -92,7 +79,7 @@ p, li, .stMarkdown,
 }
 
 section[data-testid="stSidebar"] {
-    background-color: var(--panel-bg) !important;
+    background-color: #FFFBEB !important;
     border-right: 1px solid var(--border);
 }
 section[data-testid="stSidebar"] .stSelectbox label,
@@ -123,11 +110,8 @@ section[data-testid="stSidebar"] .stMultiSelect label {
 }
 
 div[data-testid="stMetric"] {
-    background: linear-gradient(180deg, #FFFFFF 0%, #FCFAF7 100%);
-    border: 1px solid #E7DED2;
-    border-radius: 10px;
-    padding: 14px 18px;
-    box-shadow: 0 10px 24px rgba(90, 60, 25, 0.05);
+    background: #FED7AA; border: 1px solid var(--border);
+    border-radius: 6px; padding: 14px 18px;
 }
 div[data-testid="stMetric"] label {
     font-family: 'DM Sans', sans-serif !important; font-size: 0.75rem !important;
@@ -139,12 +123,8 @@ div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
 }
 
 .pollen-strip {
-    background: linear-gradient(180deg, #FFFFFF 0%, #FCFAF7 100%);
-    border: 1px solid #E7DED2;
-    border-radius: 12px;
-    padding: 16px 24px;
-    margin-bottom: 1.2rem;
-    box-shadow: 0 12px 28px rgba(90, 60, 25, 0.05);
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px 24px; margin-bottom: 1.2rem;
 }
 .pollen-strip-title {
     font-family: 'DM Sans', sans-serif; font-size: 0.72rem;
@@ -165,53 +145,10 @@ div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
 .risk-severe { background: #FFEBEE; color: #A8201A; }
 
 .detail-panel {
-    background:
-        radial-gradient(circle at top right, rgba(255, 224, 188, 0.28), transparent 34%),
-        linear-gradient(180deg, #FFFFFF 0%, #FCFAF7 100%);
-    border: 1px solid #E7DED2;
-    border-radius: 12px;
-    padding: 20px 24px;
-    margin-top: 1rem;
-    box-shadow: 0 14px 32px rgba(90, 60, 25, 0.06);
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 20px 24px; margin-top: 1rem;
 }
 .detail-panel h3 { font-family: 'Playfair Display', serif !important; margin-bottom: 4px; }
-.prediction-note {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    background: linear-gradient(135deg, #FBF7F0 0%, #F6EFE3 100%);
-    border: 1px solid #E7DED2;
-    border-left: 4px solid var(--accent-warm);
-    border-radius: 10px;
-    padding: 12px 16px;
-    margin-bottom: 12px;
-    line-height: 1.55;
-    box-shadow: 0 8px 22px rgba(196, 80, 26, 0.08);
-}
-.panel-heading {
-    display: inline-block;
-    margin: 0 0 0.85rem 0;
-    padding: 0.35rem 0.8rem 0.4rem;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    background: linear-gradient(135deg, #FFF7ED 0%, #FDEBD2 100%);
-    font-family: 'DM Sans', sans-serif !important;
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--accent-warm) !important;
-}
-.panel-heading-map {
-    background: linear-gradient(135deg, #FFF7ED 0%, #FDEBD2 100%);
-    color: var(--accent-warm) !important;
-}
-.panel-heading-detail {
-    background: linear-gradient(135deg, #FFF4DB 0%, #FFE3A3 100%);
-    border-color: #E7C56B;
-    color: #8B5A00 !important;
-    box-shadow: 0 6px 18px rgba(196, 80, 26, 0.08);
-}
 .stat-row {
     display: flex; justify-content: space-between; padding: 6px 0;
     border-bottom: 1px solid #F0EDE8; font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
@@ -612,23 +549,25 @@ if selected_risk != "All Levels":
 # ── Model evaluation ─────────────────────────────────────────────────────────
 
 st.markdown("## Model Evaluation")
-st.markdown("""
-<div style="font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1rem; max-width: 760px;">
-    These metrics come from 4 walk-forward cross-validation folds and reflect out-of-sample model performance.
+fold_count_text = len(fold_results) if not fold_results.empty else "available"
+st.markdown(f"""
+<div style="font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: #6B7280; margin-bottom: 1rem; max-width: 760px;">
+    These metrics come from {fold_count_text} walk-forward cross-validation folds and reflect out-of-sample model performance. <br>
     The map and charts below do not use these holdout predictions; they use fitted full-period predictions from the final model.
 </div>
 """, unsafe_allow_html=True)
 
 if not fold_results.empty:
+    fold_count = len(fold_results)
     eval_col1, eval_col2, eval_col3, eval_col4 = st.columns(4)
     with eval_col1:
-        st.metric("Mean MAE Across 4 Folds", f"{fold_results['mae'].mean():.2f}")
+        st.metric(f"Mean MAE Across {fold_count} Folds", f"{fold_results['mae'].mean():.2f}")
     with eval_col2:
-        st.metric("Mean RMSE Across 4 Folds", f"{fold_results['rmse'].mean():.2f}")
+        st.metric(f"Mean RMSE Across {fold_count} Folds", f"{fold_results['rmse'].mean():.2f}")
     with eval_col3:
-        st.metric("Mean Pearson r Across 4 Folds", f"{fold_results['pearson_r'].mean():.3f}")
+        st.metric(f"Mean Pearson r Across {fold_count} Folds", f"{fold_results['pearson_r'].mean():.3f}")
     with eval_col4:
-        st.metric("Mean NTAs Within 15%", f"{fold_results['pct_ntas_within_15pct'].mean():.1%}")
+        st.metric(f"Mean NTAs Within 15% Across {fold_count} Folds", f"{fold_results['pct_ntas_within_15pct'].mean():.1%}")
 
     st.markdown("### Fold-by-Fold Performance")
     eval_table = fold_results.copy()
@@ -733,21 +672,27 @@ st.markdown(f'<h2 style="border:none; padding:0;">{display_month} {source_tag}</
 
 if month_data["has_prediction"].any():
     if prediction_mode == "full_period":
-        prediction_note = (
-            "Showing fitted predictions from the final XGBoost model trained on the full dataset. "
-            "These values cover the full available timeline and support map, chart, and neighborhood exploration. "
-            "They should not be interpreted as cross-validation performance."
-        )
-    else:
-        prediction_note = (
-            "Showing predictions from the available model output for this period. "
-            "Cross-validation performance is summarized above in the Model Evaluation section."
-        )
+        prediction_note = """
+        Showing fitted predictions from the final XGBoost model trained on the full dataset.
+        These values cover the full available timeline and support map, chart, and neighborhood exploration.
+        They should not be interpreted as cross-validation performance.
+        """
     st.markdown(f"""
-    <div class="prediction-note">
-        {prediction_note}
-    </div>
-    """, unsafe_allow_html=True)
+        <div style="
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            background: #F9F7F4;
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent-warm);
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        ">
+            {prediction_note}
+        </div>
+""", unsafe_allow_html=True)
 
 
 # ── Summary metrics ──────────────────────────────────────────────────────────
@@ -780,7 +725,7 @@ if "selected_nta" not in st.session_state:
 map_col, detail_col = st.columns([3, 2])
 
 with map_col:
-    st.markdown('<div class="panel-heading panel-heading-map">Neighborhood Risk Map</div>', unsafe_allow_html=True)
+    st.markdown("### Neighborhood Risk Map")
 
     choropleth = build_choropleth(geojson_data, month_data, "display_value", st.session_state.selected_nta)
     map_output = st_folium(choropleth, width=None, height=640, returned_objects=["last_object_clicked_tooltip"])
@@ -806,7 +751,6 @@ with map_col:
 
 
 with detail_col:
-    st.markdown('<div class="panel-heading panel-heading-detail">Select a Neighborhood</div>', unsafe_allow_html=True)
     if st.session_state.selected_nta:
         nta_code = st.session_state.selected_nta
         nta_row = month_data[month_data["nta_code"] == nta_code]
@@ -820,7 +764,7 @@ with detail_col:
                 diff = nta["pred"] - nta["ed_visits"]
                 diff_pct = diff / nta["ed_visits"] * 100 if nta["ed_visits"] > 0 else 0
                 diff_sign = "+" if diff > 0 else ""
-                pred_actual_html = f"""<div class="stat-row" style="margin-top: 8px">
+                pred_actual_html = f"""<div class="stat-row" >
 <span class="stat-label">Fitted Prediction</span>
 <span class="stat-value" style="color: #C4501A;">{nta['pred']:.1f}</span>
 </div>
@@ -905,6 +849,9 @@ with detail_col:
     else:
         st.markdown("""
         <div class="detail-panel" style="text-align: center; padding: 60px 24px;">
+            <div style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 8px;">
+                Select a Neighborhood
+            </div>
             <div style="font-family: 'DM Sans', sans-serif; font-size: 0.85rem; color: var(--text-muted);">
                 Click on a colored area on the map to view<br>observed vs. fitted ED visits, trends, and local context.
             </div>
@@ -945,11 +892,16 @@ for col, features in [(fi_col1, top_features.head(5)), (fi_col2, top_features.ta
 
 # ── Footer ───────────────────────────────────────────────────────────────────
 
-st.markdown("""
+footer_eval_label = (
+    f"{len(fold_results)}-fold walk-forward CV"
+    if not fold_results.empty
+    else "walk-forward CV"
+)
+st.markdown(f"""
 <div class="footer">
     <strong>Pollen & Pain</strong> — Forecasting Neighborhood-Level Asthma Emergency Department Surges in New York City<br>
     Data sources: NYC DOHMH Syndromic Surveillance, AAAAI National Allergy Bureau, Open-Meteo, EPA AQS, NYC Street Tree Census, NYC 311<br>
-    Model evaluation: 4-fold walk-forward CV · Full-period dashboard uses fitted predictions from the final model trained on all available data<br>
+    Model evaluation: {footer_eval_label} · Full-period dashboard uses fitted predictions from the final model trained on all available data<br>
     Built by Saketh Boddu, Andre Nguyen, and Nam Lai
 </div>
 """, unsafe_allow_html=True)
