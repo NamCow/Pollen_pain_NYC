@@ -1,6 +1,16 @@
 """
-Train a final XGBoost model on all available seasonal rows and generate
-predictions for every NTA x month in the usable modeling window.
+Standalone re-prediction script (NOT the canonical training pipeline).
+
+This script trains a final XGBoost model on all available rows and generates
+fitted predictions for every NTA x month in the modeling window.  It does NOT
+perform walk-forward cross-validation, holdout evaluation, baseline comparison,
+or any of the diagnostic checks that the canonical pipeline produces.
+
+Use this only when you need to quickly regenerate final_predictions.csv without
+re-running the full evaluation suite.  For the complete training + evaluation
+pipeline, use ``train_xgboost.py`` instead, which produces CV fold results,
+holdout metrics, feature importance, baseline comparisons, and the same
+final_predictions.csv as a last step.
 
 Input:  data/processed/modeling_table.csv
 Output: data/models/final_predictions.csv

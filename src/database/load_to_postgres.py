@@ -8,14 +8,15 @@ Assumes the schema from setup_schema.sql has already been created.
 Connection defaults to local pollen_pain database.
 """
 
+import os
+
 import pandas as pd
 import psycopg2
 from psycopg2.extras import execute_values
 from pathlib import Path
+from dotenv import load_dotenv
 
 PROCESSED = Path("./data/processed")
-import os
-from dotenv import load_dotenv
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 load_dotenv(REPO_ROOT / ".env")

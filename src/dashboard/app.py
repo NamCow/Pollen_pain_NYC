@@ -5,14 +5,17 @@ Streamlit application pulling all data from PostgreSQL (pollen schema).
 Run: streamlit run src/dashboard/app.py
 """
 
+import json
+import os
+
 import streamlit as st
 import pandas as pd
 import folium
 from streamlit_folium import st_folium
 import plotly.graph_objects as go
-import json
 import psycopg2
 from pathlib import Path
+from dotenv import load_dotenv
 
 # ── Page config ──────────────────────────────────────────────────────────────
 
@@ -284,9 +287,6 @@ footer { visibility: hidden; }
 
 
 # ── Database connection ──────────────────────────────────────────────────────
-
-import os
-from dotenv import load_dotenv
 
 # Load .env securely from the true directory
 load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env")
@@ -1038,6 +1038,92 @@ if holdout_available:
             <div class="eval-card-title">NTAs within 15%</div>
             <div class="eval-big-number">{within_15:.1%}</div>
             <div class="eval-label"><span class="eval-badge badge-{within_badge}">{within_label}</span></div>
+        </div>""", unsafe_allow_html=True)
+
+
+# ── Residual analysis ───────────────────────────────────────────────────────
+
+pred_data = merged[merged["has_prediction"]].copy()
+if not pred_data.empty and "pred" in pred_data.columns:
+    pred_data["residual"] = pred_data["pred"] - pred_data["ed_visits"]
+    pred_data["abs_error"] = pred_data["residual"].abs()
+    pred_data["pct_error"] = (pred_data["abs_error"] / pred_data["ed_visits"].clip(lower=1)) * 100
+
+    st.markdown("### Error Analysis")
+    st.markdown("""
+    <div class="eval-section-intro">
+        Distribution of prediction errors across all neighborhoods and months, showing where the model
+        over- or under-predicts and how errors are distributed.
+    </div>
+    """, unsafe_allow_html=True)
+
+    err_c1, err_c2 = st.columns(2)
+
+    with err_c1:
+        fig_resid = go.Figure()
+        fig_resid.add_trace(go.Histogram(
+            x=pred_data["residual"], nbinsx=50,
+            marker_color="#C4501A", opacity=0.85,
+        ))
+        fig_resid.add_vline(x=0, line_dash="dash", line_color="#1A1A1A", line_width=1.5)
+        fig_resid.update_layout(
+            title=dict(text="Residual Distribution (Predicted - Actual)", font=dict(family="Playfair Display", size=16)),
+            height=340, margin=dict(l=0, r=0, t=40, b=30),
+            plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+            font=dict(family="DM Sans", size=12, color="#5A5A5A"),
+            xaxis=dict(title="Residual (ED visits)", showgrid=False),
+            yaxis=dict(title="Count", gridcolor="#F0EDE8"),
+        )
+        st.plotly_chart(fig_resid, use_container_width=True, config={"displayModeBar": False})
+
+    with err_c2:
+        fig_scatter = go.Figure()
+        fig_scatter.add_trace(go.Scatter(
+            x=pred_data["ed_visits"], y=pred_data["pred"],
+            mode="markers", marker=dict(size=3, color="#C4501A", opacity=0.4),
+        ))
+        max_val = max(pred_data["ed_visits"].max(), pred_data["pred"].max())
+        fig_scatter.add_trace(go.Scatter(
+            x=[0, max_val], y=[0, max_val],
+            mode="lines", line=dict(color="#1A1A1A", dash="dash", width=1.5),
+            showlegend=False,
+        ))
+        fig_scatter.update_layout(
+            title=dict(text="Predicted vs. Actual", font=dict(family="Playfair Display", size=16)),
+            height=340, margin=dict(l=0, r=0, t=40, b=30),
+            plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+            font=dict(family="DM Sans", size=12, color="#5A5A5A"),
+            xaxis=dict(title="Actual ED Visits", showgrid=True, gridcolor="#F0EDE8"),
+            yaxis=dict(title="Predicted ED Visits", showgrid=True, gridcolor="#F0EDE8"),
+            showlegend=False,
+        )
+        st.plotly_chart(fig_scatter, use_container_width=True, config={"displayModeBar": False})
+
+    err_summary_c1, err_summary_c2, err_summary_c3, err_summary_c4 = st.columns(4)
+    with err_summary_c1:
+        st.markdown(f"""<div class="eval-card">
+            <div class="eval-card-title">Median Abs. Error</div>
+            <div class="eval-big-number">{pred_data['abs_error'].median():.2f}</div>
+            <div class="eval-label">ED visits</div>
+        </div>""", unsafe_allow_html=True)
+    with err_summary_c2:
+        st.markdown(f"""<div class="eval-card">
+            <div class="eval-card-title">Mean Residual</div>
+            <div class="eval-big-number">{pred_data['residual'].mean():+.2f}</div>
+            <div class="eval-label">{'slight overpredict' if pred_data['residual'].mean() > 0 else 'slight underpredict'}</div>
+        </div>""", unsafe_allow_html=True)
+    with err_summary_c3:
+        st.markdown(f"""<div class="eval-card">
+            <div class="eval-card-title">95th Pctl Error</div>
+            <div class="eval-big-number">{pred_data['abs_error'].quantile(0.95):.2f}</div>
+            <div class="eval-label">worst 5% of predictions</div>
+        </div>""", unsafe_allow_html=True)
+    with err_summary_c4:
+        within_10 = (pred_data["pct_error"] <= 10).mean()
+        st.markdown(f"""<div class="eval-card">
+            <div class="eval-card-title">Within 10% Error</div>
+            <div class="eval-big-number">{within_10:.1%}</div>
+            <div class="eval-label">of all predictions</div>
         </div>""", unsafe_allow_html=True)
 
 

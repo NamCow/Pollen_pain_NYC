@@ -1,49 +1,72 @@
-# Pollen & Pain: Forecasting Neighborhood-Level Asthma ED Surges in NYC
+# Pollen & Pain
 
-## Team
-- Saketh Boddu
-- Andre Nguyen
-- Nam Lai
+Forecasting neighborhood-level asthma emergency department surges in New York City.
 
----
-
-## 🎯 Project Overview
-**Pollen & Pain** is a public health decision-support application built to forecast monthly asthma emergency department (ED) visit surges across New York City at the Neighborhood Tabulation Area (NTA) level. 
-
-By analyzing the intersection of environmental triggers (tree, weed, grass, and mold pollen, as well as extreme weather events) and compounding factors like air quality (PM2.5, NO2, Ozone), baseline community health, and tree canopy density, this system provides actionable intelligence. It accurately identifies which neighborhoods are most at-risk of asthma ED surges, empowering NYC health officials to proactively deploy mobile inhaler clinics and issue targeted health interventions.
-
-## 🧠 Technical Architecture
-
-The application is broken down into three core components:
-
-1. **The Data Pipeline (ETL & Database)**
-   - **Sources:** Extracts data from the EPA, NYC Open Data (Tree Census, 311 Complaints), Open-Meteo, and AAAAI pollen counters.
-   - **Transformation:** Interpolates and allocates borough-level asthma ED visit counts to the neighborhood level using accurate 2023 NTA-level ground-truth prevalence rates.
-   - **Storage (Supabase):** The pipeline outputs 9 processed relational tables stored securely in a hosted **PostgreSQL database (Supabase)**.
-
-2. **Machine Learning Pipeline**
-   - **Walk-Forward Time-Series CV:** The models are strictly trained using past data blocks to predict future blocks, eliminating temporal data leakage.
-   - **Models Used:** 
-     * **XGBoost Regressor (Primary):** Learns complex, non-linear environmental interactions to accurately predict exact continuous ED visit counts per NTA.
-     * **Logistic Regression (Baseline):** Predicts above-median vs. below-median risk levels to act as a comparative tool.
-   - **Feature Discoveries:** We found that base neighborhood health dictates the standard volume of ED visits, but **4-week delayed pollen exposure** and minimum temperatures drive acute, month-to-month surges.
-
-3. **Streamlit Dashboard**
-   - A highly interactive, professional web interface built for policymakers.
-   - Connects live to the Supabase database.
-   - Features visual tools such as interactive Folium choropleth neighborhood risk maps, feature importance charts ("Why the model made this prediction"), and drill-down NTA tables.
+Built by Saketh Boddu, Andre Nguyen, and Nam Lai.
 
 ---
 
-## 🚀 How to Run the Application
+## What this project does
 
-### Prerequisites
-- **Python 3.11+** is required.
-- You will need a `.env` file securely configured to connect to the Supabase database.
+Asthma is one of the most common reasons people in NYC end up in the emergency department, and certain neighborhoods get hit much harder than others. The problem is that most forecasting tools only work at the city or county level, which hides the variation between neighborhoods where public health decisions actually get made.
 
-### 1. Set Up Your Environment
-Ensure your `.env` file is present in the main directory (or parent directory) and contains the following keys securely provided by an administrator:
-```env
+This project predicts monthly asthma ED visit counts for each of NYC's 197 neighborhoods (NTA level) across all five boroughs. It combines pollen data, weather, air quality, tree canopy density, and community health baselines to figure out which neighborhoods are most likely to see surges and when.
+
+The end goal is a tool that schools, clinics, and public health planners can use to prepare before a surge happens rather than react after it does.
+
+## How it works
+
+The project has three main parts: a data pipeline, a machine learning model, and a dashboard.
+
+### Data pipeline
+
+We pull data from a bunch of different public sources, including the AAAAI pollen station, Open-Meteo weather archive, EPA air quality monitors, the NYC street tree census, NYC 311 complaints, and NYC DOHMH health surveys. Each source comes in a different geographic unit and time scale, so the ETL scripts align everything to the NTA neighborhood level on a monthly basis.
+
+The target variable (monthly asthma ED visits per neighborhood) had to be constructed because NYC only publishes this data at the borough level. We distributed borough counts across neighborhoods proportionally using 2023 NTA-level ground-truth prevalence rates from DOHMH.
+
+All processed data is stored in a PostgreSQL database hosted on Supabase. The dashboard reads directly from the database.
+
+### Machine learning
+
+We trained two models using walk-forward time-series cross-validation, which means the model only ever trains on past data and predicts forward, the same way it would work in the real world.
+
+The primary model is an XGBoost regressor that predicts exact ED visit counts per neighborhood per month. The baseline is a logistic regression classifier that predicts whether a neighborhood will have an above-median or below-median month.
+
+We also compared XGBoost against two naive baselines: a seasonal average (predict the historical mean for that calendar month) and a prior-month carry-forward (predict next month equals this month).
+
+Key findings from the model:
+- Neighborhood-level asthma prevalence is the strongest predictor of ED visit volume, which makes sense since it captures the baseline health burden.
+- Pollen exposure at a 4-week lag is the next most important environmental driver, confirming the documented delay between pollen exposure and asthma ED surges.
+- Temperature extremes, PM2.5, tree canopy density, and ozone all contribute meaningfully.
+
+### Dashboard
+
+The Streamlit dashboard connects live to the Supabase database and lets users explore predictions interactively. It includes a neighborhood risk map (choropleth), feature importance visualization, actual vs. predicted trend charts for individual neighborhoods, and a full model evaluation section with holdout metrics, baseline comparisons, and validation signals.
+
+## Results
+
+On a held-out test period (May to October 2025) that the model never saw during training or tuning:
+
+- MAE of 1.98 ED visits (mean absolute error)
+- RMSE of 2.36
+- Pearson correlation of 0.973 between predicted and actual values
+- 85.5% of neighborhoods were predicted within 15% error, exceeding the 70% target
+
+The logistic regression baseline achieved a mean AUC-ROC of 0.885 across 4 folds.
+
+The model outperformed the prior-month baseline on all metrics. It also outperformed the seasonal average on MAE and RMSE, though the seasonal average had a higher percentage of neighborhoods within 15% (91.4% vs 85.5%). This is because the seasonal average makes safe, flat predictions that are rarely far off, while XGBoost takes more risk trying to predict actual fluctuations and sometimes overshoots on individual neighborhoods.
+
+We also validated the model against Community Health Survey prevalence rates. The correlation between predicted ED visits and CHS asthma prevalence was 0.894 (p < 0.001), nearly identical to the correlation between actual ED visits and CHS prevalence (0.888). This means the model learned real spatial health patterns, not noise.
+
+Pollen lag correlations were statistically significant at both the 2-week lag (r = 0.098, p < 0.001) and 4-week lag (r = 0.155, p < 0.001), confirming the biological relationship between pollen exposure and asthma ED surges.
+
+## How to run it
+
+You need Python 3.11 or later and a `.env` file with the database credentials.
+
+Set up the `.env` file in the project root or parent directory:
+
+```
 DB_HOST="..."
 DB_PORT=5432
 DB_NAME="postgres"
@@ -51,29 +74,53 @@ DB_USER="..."
 DB_PASSWORD="..."
 ```
 
-### 2. Install Dependencies
-Make sure all necessary packages are installed. You can install them using pip:
-```bash
+Install the dependencies:
+
+```
 pip install pandas psycopg2-binary streamlit folium streamlit-folium plotly geopandas python-dotenv xgboost scikit-learn
 ```
 
-### 3. Run the Dashboard
-To boot up the interactive dashboard and connect live to the database, run the following command from the root folder (`Pollen_pain_NYC`):
+Run the dashboard:
 
-```bash
-python -m streamlit run src/dashboard/app.py
 ```
-*Note: If you run into "ModuleNotFoundError" issues on Mac, ensure you are invoking Streamlit via the exact python executable you installed the packages to (e.g., `/opt/homebrew/.../python3.13 -m streamlit run src/dashboard/app.py`).*
+streamlit run src/dashboard/app.py
+```
 
-The app will instantly launch a local web server, and you can view the dashboard by opening `http://localhost:8501` in your browser.
+It will open at http://localhost:8501.
 
----
+## Data sources
 
-## 📁 Repository Structure
-- `data/`: Raw source data, processed CSVs, and generated model inferences.
-- `src/extract/`: Scraping and API ingestion tools.
-- `src/transform/`: Feature engineering, NTA allocation algorithms, and target variable building.
-- `src/database/`: Schema configurations (`setup_schema.sql`) and database population scripts (`load_to_postgres.py`).
-- `src/models/`: XGBoost and Logistic Regression training and walk-forward cross-validation logic.
-- `src/dashboard/`: The `app.py` Streamlit application and CSS styling.
-- `docs/`: Proposal files and project documentation.
+- AAAAI National Allergy Bureau: daily pollen counts (tree, weed, grass, mold) from March 2022 onward
+- Open-Meteo: daily temperature, precipitation, and wind speed for each neighborhood centroid
+- EPA AQS and AirNow: monthly PM2.5, NO2, and ozone levels
+- NYC DOHMH: asthma ED visit rates, community health survey respiratory data
+- NYC Open Data: street tree census (683,788 trees), 311 air quality complaints
+- NYC syndromic surveillance: monthly borough-level asthma ED counts
+
+## Limitations and assumptions
+
+There are several things worth being upfront about.
+
+The biggest one is that the model's top feature by a wide margin is neighborhood-level asthma prevalence from the Community Health Survey, which accounts for about 67% of feature importance. This means the model is largely learning that high-asthma neighborhoods stay high, with environmental factors like pollen and weather driving the month-to-month variation on top of that baseline. The environmental forecasting value is real but incremental. If CHS prevalence data were unavailable, the model would perform significantly worse.
+
+The target variable itself is an estimate. NYC does not publish monthly asthma ED visits at the neighborhood level, so we constructed it by distributing borough-level monthly counts across NTAs proportionally using annual prevalence rates. This assumes the within-borough distribution of ED visits is stable month to month, which may not hold during localized events like construction dust or wildfires.
+
+Pollen data comes from a single monitoring station and is applied uniformly across all neighborhoods. In reality, pollen exposure varies with local vegetation, wind patterns, and building density. The tree canopy and weather features partially compensate for this, but true neighborhood-level pollen variation is not captured.
+
+The modeling window covers March 2022 to October 2025, which is about 32 months of usable data across 186 NTAs. This is enough for the model to learn seasonal patterns but may not generalize to unusual years (e.g., pandemic-era healthcare utilization shifts, climate anomalies).
+
+XGBoost hyperparameters were set manually rather than tuned with grid search or Bayesian optimization. The model performs well with the current settings, but there is likely room for marginal improvement with systematic tuning.
+
+The model does not produce prediction intervals or uncertainty estimates. It outputs point predictions, which means a prediction of 30 ED visits for a neighborhood does not communicate whether the model is confident or uncertain about that number.
+
+Finally, while the model outperforms the prior-month baseline on all metrics, it does not beat the seasonal average on the percentage of NTAs within 15% error. The seasonal average achieves 91.4% versus XGBoost's 85.5%. This is because the seasonal average makes conservative, flat predictions that are rarely far off, while XGBoost takes more risk by trying to predict actual monthly fluctuations. The tradeoff is lower total error at the cost of slightly less consistency across individual neighborhoods.
+
+## Repository structure
+
+- `data/` - raw source data, processed CSVs, model outputs, and reference files (shapefiles, crosswalks)
+- `src/extract/` - scripts that pull data from APIs, web scraping, and bulk downloads
+- `src/etl/` - scripts that transform, aggregate, and align data to NTA level
+- `src/features/` - feature engineering (pollen index, lag features, canopy score)
+- `src/models/` - XGBoost and logistic regression training with walk-forward CV
+- `src/database/` - schema setup and database loading scripts
+- `src/dashboard/` - Streamlit application
