@@ -1,0 +1,62 @@
+paths:
+  processed: ./data/processed
+  models: ./data/models
+  input: ./data/Input
+  geojson: ./data/Input/nta2020.geojson
+
+modeling:
+  target: ed_visits
+  min_avg_monthly_ed_visits: 12.0
+  pollen_season_months: [3, 4, 5, 6, 7, 8, 9, 10]
+  holdout_months: 6
+  cv_test_months: 6
+  cv_min_train_months: 12
+
+xgboost:
+  n_estimators: 200
+  max_depth: 6
+  learning_rate: 0.1
+  subsample: 0.8
+  colsample_bytree: 0.8
+  random_state: 42
+  verbosity: 0
+
+logistic_regression:
+  max_iter: 1000
+  random_state: 42
+
+features:
+  - temp_max_mean
+  - temp_min_mean
+  - precip_total
+  - wind_max_mean
+  - pollen_composite_avg
+  - pollen_composite_max
+  - tree_avg
+  - tree_max
+  - weed_avg
+  - grass_avg
+  - pollen_14d_lag_avg
+  - pollen_28d_lag_avg
+  - pm25_mean
+  - ozone_mean
+  - no2_mean
+  - tree_count
+  - total_dbh
+  - mean_dbh
+  - pct_good_health
+  - chs_asthma_pct
+  - month_sin
+  - month_cos
+  - season_progress
+  - temp_diurnal_range
+  - warm_dry_index
+  - pollen_change_vs_28d
+  - pollen_temp_interaction
+  - pollen_pm25_interaction
+  - pollen_chs_interaction
+  - weed_temp_interaction
+
+required_features:
+  - pollen_composite_avg
+  - temp_max_mean

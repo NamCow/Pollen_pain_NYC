@@ -117,6 +117,7 @@ Finally, while the model outperforms the prior-month baseline on all metrics, it
 
 ## Repository structure
 
+- `config/` - centralized configuration (settings.yaml with all hyperparameters, paths, and feature definitions)
 - `data/` - raw source data, processed CSVs, model outputs, and reference files (shapefiles, crosswalks)
 - `src/extract/` - scripts that pull data from APIs, web scraping, and bulk downloads
 - `src/etl/` - scripts that transform, aggregate, and align data to NTA level
@@ -124,3 +125,24 @@ Finally, while the model outperforms the prior-month baseline on all metrics, it
 - `src/models/` - XGBoost and logistic regression training with walk-forward CV
 - `src/database/` - schema setup and database loading scripts
 - `src/dashboard/` - Streamlit application
+- `src/utils/` - shared utilities including configuration loader
+
+## References
+
+1. Darrow, L. A., Hess, J., Rogers, C. A., Tolbert, P. E., Klein, M., & Sarnat, S. E. (2012). Ambient pollen concentrations and emergency department visits for asthma and wheeze. *Journal of Allergy and Clinical Immunology*, 130(3), 630–638. https://doi.org/10.1016/j.jaci.2012.06.020
+
+2. Erbas, B., Jazayeri, M., Lambert, K. A., Katelaris, C. H., Prendergast, L. A., Tham, R., ... & Abramson, M. J. (2018). Outdoor pollen is a trigger of child and adolescent asthma emergency department presentations: A systematic review and meta-analysis. *Allergy*, 73(8), 1632–1641. https://doi.org/10.1111/all.13407
+
+3. Gleason, J. A., Bielory, L., & Fagliano, J. A. (2014). Associations between ozone, PM2.5, and four pollen types on emergency department pediatric asthma events during the warm season in New Jersey: A case-crossover study. *Environmental Research*, 132, 421–429. https://doi.org/10.1016/j.envres.2014.03.035
+
+4. NYC Department of Health and Mental Hygiene. (2023). *Community Health Survey: Neighborhood-level respiratory health indicators*. https://www.nyc.gov/site/doh/data/data-sets/community-health-survey.page
+
+5. Zheng, X.-Y., Ding, H., Jiang, L.-N., Chen, S.-W., Zheng, J.-P., Qiu, M., ... & Guan, W.-J. (2015). Association between air pollutants and asthma emergency room visits and hospital admissions in time series studies: A systematic review and meta-analysis. *PLOS ONE*, 10(9), e0138146. https://doi.org/10.1371/journal.pone.0138146
+
+6. Sheffield, P. E., Weinberger, K. R., Ito, K., Matte, T. D., Mathes, R. W., Robinson, G. S., & Kinney, P. L. (2011). The association of tree pollen concentration peaks and allergy medication sales in New York City: 2003–2008. *ISRN Allergy*, 2011, 537194. https://doi.org/10.5402/2011/537194
+
+7. Chen, T., & Guestrin, C. (2016). XGBoost: A scalable tree boosting system. *Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining*, 785–794. https://doi.org/10.1145/2939672.2939785
+
+8. Tashiro, H., & Shore, S. A. (2019). Obesity and severe asthma. *Allergology International*, 68(2), 135–142. https://doi.org/10.1016/j.alit.2018.10.004
+
+9. Héguy, L., Garneau, M., Goldberg, M. S., Raphoz, M., Guay, F., & Valois, M.-F. (2008). Associations between grass and weed pollen and emergency department visits for asthma among children in Montreal. *Environmental Research*, 106(2), 203–211. https://doi.org/10.1016/j.envres.2007.10.005

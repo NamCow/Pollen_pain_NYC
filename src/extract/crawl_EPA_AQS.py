@@ -2,6 +2,9 @@ import pandas as pd
 import requests
 import zipfile
 import io
+from pathlib import Path
+
+OUTPUT_DIR = Path("./data/raw")
 
 def get_epa_nyc_monthly(pollutant_code, years=[2022, 2023, 2024]):
     nyc_counties = ['New York', 'Bronx', 'Kings', 'Queens', 'Richmond']
@@ -34,7 +37,7 @@ def get_epa_nyc_monthly(pollutant_code, years=[2022, 2023, 2024]):
         )
         monthly['year'] = year
         all_data.append(monthly)
-        print(f"  ✓ {len(monthly)} months collected")
+        print(f"  {len(monthly)} months collected")
 
     result = pd.concat(all_data, ignore_index=True)
     result['month'] = result['month'].astype(str)
@@ -42,28 +45,30 @@ def get_epa_nyc_monthly(pollutant_code, years=[2022, 2023, 2024]):
 
 
 if __name__ == "__main__":
-    # PM2.5 
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    # PM2.5
     pm25 = get_epa_nyc_monthly('88101')
-    pm25.to_csv('pm25_nyc_monthly.csv', index=False)
+    pm25.to_csv(OUTPUT_DIR / 'pm25_nyc_monthly.csv', index=False)
     print("\nPM2.5 sample:")
     print(pm25.head())
 
-    # NO₂
+    # NO2
     no2 = get_epa_nyc_monthly('42602')
-    no2.to_csv('no2_nyc_monthly.csv', index=False)
+    no2.to_csv(OUTPUT_DIR / 'no2_nyc_monthly.csv', index=False)
     print("\nNO2 sample:")
     print(no2.head())
 
     # Ozone
     ozone = get_epa_nyc_monthly('44201')
-    ozone.to_csv('ozone_nyc_monthly.csv', index=False)
+    ozone.to_csv(OUTPUT_DIR / 'ozone_nyc_monthly.csv', index=False)
     print("\nOzone sample:")
     print(ozone.head())
 
-    # Merge 
+    # Merge
     merged = pm25.merge(no2, on=['month', 'year'], how='outer') \
                  .merge(ozone, on=['month', 'year'], how='outer')
     merged = merged.sort_values('month').reset_index(drop=True)
-    merged.to_csv('air_quality_nyc_monthly.csv', index=False)
-    print("\n Done! Saved air_quality_nyc_monthly.csv")
+    merged.to_csv(OUTPUT_DIR / 'air_quality_nyc_monthly.csv', index=False)
+    print(f"\nSaved: {OUTPUT_DIR / 'air_quality_nyc_monthly.csv'}")
     print(merged)

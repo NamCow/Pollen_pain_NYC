@@ -1,30 +1,25 @@
 """
 Feature definitions and engineering utilities shared across training scripts.
+
+All constants (feature lists, hyperparameters, thresholds) are loaded from
+config/settings.yaml via src.utils.config so that every script shares a
+single source of truth.
 """
 
 import math
 
 import pandas as pd
 
-FEATURE_COLS = [
-    "temp_max_mean", "temp_min_mean", "precip_total", "wind_max_mean",
-    "pollen_composite_avg", "pollen_composite_max",
-    "tree_avg", "tree_max", "weed_avg", "grass_avg",
-    "pollen_14d_lag_avg", "pollen_28d_lag_avg",
-    "pm25_mean", "ozone_mean", "no2_mean",
-    "tree_count", "total_dbh", "mean_dbh", "pct_good_health",
-    "chs_asthma_pct",
-    "month_sin", "month_cos", "season_progress",
-    "temp_diurnal_range", "warm_dry_index",
-    "pollen_change_vs_28d", "pollen_temp_interaction",
-    "pollen_pm25_interaction", "pollen_chs_interaction",
-    "weed_temp_interaction",
-]
-
-TARGET = "ed_visits"
-POLLEN_SEASON_MONTHS = tuple(range(3, 11))
-REQUIRED_MODEL_FEATURES = ["pollen_composite_avg", "temp_max_mean"]
-MIN_AVG_MONTHLY_ED_VISITS = 12.0
+from src.utils.config import (
+    FEATURE_COLS,
+    MIN_AVG_MONTHLY_ED_VISITS,
+    POLLEN_SEASON_MONTHS,
+    REQUIRED_MODEL_FEATURES,
+    TARGET,
+    XGBOOST_PARAMS,
+    CV_MIN_TRAIN_MONTHS,
+    PROCESSED_DIR,
+)
 
 
 def walk_forward_splits(df: pd.DataFrame, n_test_months: int = 6):
@@ -35,7 +30,7 @@ def walk_forward_splits(df: pd.DataFrame, n_test_months: int = 6):
     """
     months = sorted(df["year_month"].unique())
     total = len(months)
-    min_train = 12
+    min_train = CV_MIN_TRAIN_MONTHS
 
     for i in range(min_train, total, n_test_months):
         test_end = min(i + n_test_months, total)
@@ -109,7 +104,7 @@ def holdout_split(df: pd.DataFrame, holdout_months: int = 6):
 
 
 def load_modeling_table(
-    path: str = "./data/processed/modeling_table.csv",
+    path: str = str(PROCESSED_DIR / "modeling_table.csv"),
     season_only: bool = True,
     require_complete_features: bool = True,
     min_avg_monthly_cases: float | None = MIN_AVG_MONTHLY_ED_VISITS,

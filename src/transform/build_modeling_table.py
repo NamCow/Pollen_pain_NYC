@@ -19,7 +19,9 @@ Output:
 import pandas as pd
 from pathlib import Path
 
-PROCESSED = Path("./data/processed")
+from src.utils.config import PROCESSED_DIR
+
+PROCESSED = PROCESSED_DIR
 OUTPUT = PROCESSED / "modeling_table.csv"
 
 

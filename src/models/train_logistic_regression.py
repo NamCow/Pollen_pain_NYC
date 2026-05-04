@@ -22,7 +22,6 @@ from sklearn.metrics import (
     f1_score,
 )
 
-OUTPUT_DIR = Path("./data/models")
 from src.features.feature_engineering import (
     FEATURE_COLS,
     MIN_AVG_MONTHLY_ED_VISITS,
@@ -30,6 +29,9 @@ from src.features.feature_engineering import (
     load_modeling_table,
     walk_forward_splits,
 )
+from src.utils.config import MODELS_DIR, LOGREG_PARAMS
+
+OUTPUT_DIR = MODELS_DIR
 
 
 def main():
@@ -64,7 +66,7 @@ def main():
         X_train_scaled = (X_train.fillna(train_mean) - train_mean) / train_std
         X_test_scaled = (X_test.fillna(train_mean) - train_mean) / train_std
 
-        model = LogisticRegression(max_iter=1000, random_state=42)
+        model = LogisticRegression(**LOGREG_PARAMS)
         model.fit(X_train_scaled, y_train)
 
         probs = model.predict_proba(X_test_scaled)[:, 1]
@@ -101,7 +103,7 @@ def main():
     all_std = X_all.std() + 1e-8
     X_all_scaled = (X_all.fillna(all_mean) - all_mean) / all_std
 
-    final_model = LogisticRegression(max_iter=1000, random_state=42)
+    final_model = LogisticRegression(**LOGREG_PARAMS)
     final_model.fit(X_all_scaled, y_all)
 
     coefficients = pd.DataFrame({

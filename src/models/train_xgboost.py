@@ -28,25 +28,18 @@ from src.features.feature_engineering import (
     FEATURE_COLS,
     MIN_AVG_MONTHLY_ED_VISITS,
     TARGET,
+    XGBOOST_PARAMS,
     holdout_split,
     load_modeling_table,
     walk_forward_splits,
 )
+from src.utils.config import MODELS_DIR, HOLDOUT_MONTHS
 
-OUTPUT_DIR = Path("./data/models")
-HOLDOUT_MONTHS = 6
+OUTPUT_DIR = MODELS_DIR
 
 
 def build_model() -> xgb.XGBRegressor:
-    return xgb.XGBRegressor(
-        n_estimators=200,
-        max_depth=6,
-        learning_rate=0.1,
-        subsample=0.8,
-        colsample_bytree=0.8,
-        random_state=42,
-        verbosity=0,
-    )
+    return xgb.XGBRegressor(**XGBOOST_PARAMS)
 
 
 def regression_metrics(actual: pd.Series, pred: pd.Series) -> dict[str, float]:
@@ -116,6 +109,38 @@ def build_final_predictions(model: xgb.XGBRegressor, df: pd.DataFrame) -> pd.Dat
     out["residual"] = out[TARGET] - out["pred"]
     out["fold"] = 0
     return out
+
+
+def error_by_borough(holdout_out: pd.DataFrame) -> pd.DataFrame:
+    rows = []
+    for borough, grp in holdout_out.groupby("borough"):
+        m = regression_metrics(grp[TARGET], grp["pred"])
+        m["pct_ntas_within_15pct"] = pct_ntas_within_threshold(grp)
+        m["borough"] = borough
+        m["n_ntas"] = grp["nta_code"].nunique()
+        m["n_rows"] = len(grp)
+        rows.append(m)
+    return pd.DataFrame(rows)
+
+
+def error_by_season(holdout_out: pd.DataFrame) -> pd.DataFrame:
+    month_num = pd.to_datetime(holdout_out["year_month"] + "-01").dt.month
+    season_map = {3: "Spring", 4: "Spring", 5: "Spring",
+                  6: "Summer", 7: "Summer", 8: "Summer",
+                  9: "Fall", 10: "Fall"}
+    holdout_out = holdout_out.copy()
+    holdout_out["season"] = month_num.map(season_map).fillna("Other")
+    rows = []
+    for season, grp in holdout_out.groupby("season"):
+        if len(grp) < 2:
+            continue
+        m = regression_metrics(grp[TARGET], grp["pred"])
+        m["pct_ntas_within_15pct"] = pct_ntas_within_threshold(grp)
+        m["season"] = season
+        m["months"] = sorted(grp["year_month"].unique())
+        m["n_rows"] = len(grp)
+        rows.append(m)
+    return pd.DataFrame(rows)
 
 
 def main():
@@ -227,6 +252,26 @@ def main():
     print(f"  CHS cross-check (pred vs CHS): r={pred_chs_r:.3f} (p={pred_chs_p:.2e})")
     print(f"  CHS cross-check (actual vs CHS): r={actual_chs_r:.3f} (p={actual_chs_p:.2e})")
 
+    print("\n=== Error Analysis by Subgroup ===")
+    borough_error_df = error_by_borough(holdout_out)
+    season_error_df = error_by_season(holdout_out)
+    borough_error_df.to_csv(OUTPUT_DIR / "holdout_error_by_borough.csv", index=False)
+    season_error_df.to_csv(OUTPUT_DIR / "holdout_error_by_season.csv", index=False)
+
+    print("\n  By Borough:")
+    for _, row in borough_error_df.iterrows():
+        print(
+            f"    {row['borough']:15s} MAE={row['mae']:.2f}  RMSE={row['rmse']:.2f}  "
+            f"r={row['pearson_r']:.3f}  within 15%={row['pct_ntas_within_15pct']:.1%}  "
+            f"({int(row['n_ntas'])} NTAs)"
+        )
+    print("\n  By Season:")
+    for _, row in season_error_df.iterrows():
+        print(
+            f"    {row['season']:10s} MAE={row['mae']:.2f}  RMSE={row['rmse']:.2f}  "
+            f"r={row['pearson_r']:.3f}  within 15%={row['pct_ntas_within_15pct']:.1%}"
+        )
+
     print("\n=== Training Production Model (all filtered data) ===")
     final_model = build_model()
     final_model.fit(df[FEATURE_COLS], df[TARGET])
@@ -283,6 +328,21 @@ def main():
     for _, row in lag_corr_df.iterrows():
         summary_lines.append(
             f"  {row['feature']:20s} r={row['pearson_r']:.3f} (p={row['pearson_p']:.2e}, n={int(row['rows'])})"
+        )
+
+    summary_lines.extend(["", "--- Error by Borough (holdout) ---"])
+    for _, row in borough_error_df.iterrows():
+        summary_lines.append(
+            f"  {row['borough']:15s} MAE={row['mae']:.2f}  RMSE={row['rmse']:.2f}  "
+            f"r={row['pearson_r']:.3f}  within 15%={row['pct_ntas_within_15pct']:.1%}  "
+            f"({int(row['n_ntas'])} NTAs)"
+        )
+
+    summary_lines.extend(["", "--- Error by Season (holdout) ---"])
+    for _, row in season_error_df.iterrows():
+        summary_lines.append(
+            f"  {row['season']:10s} MAE={row['mae']:.2f}  RMSE={row['rmse']:.2f}  "
+            f"r={row['pearson_r']:.3f}  within 15%={row['pct_ntas_within_15pct']:.1%}"
         )
 
     summary_lines.extend(["", "--- Feature Importance (top 10) ---"])

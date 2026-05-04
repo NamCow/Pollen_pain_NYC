@@ -286,6 +286,13 @@ footer { visibility: hidden; }
 """, unsafe_allow_html=True)
 
 
+# ── Project root on sys.path (needed when Streamlit runs app.py directly) ───
+
+import sys
+_PROJECT_ROOT = str(Path(__file__).resolve().parent.parent.parent)
+if _PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, _PROJECT_ROOT)
+
 # ── Database connection ──────────────────────────────────────────────────────
 
 # Load .env securely from the true directory
@@ -299,12 +306,16 @@ DB_PARAMS = dict(
     port=int(os.environ.get("DB_PORT", 5432)),
     sslmode="require" if os.environ.get("DB_HOST", "localhost") != "localhost" else "prefer",
 )
-GEOJSON_PATH = Path("./data/Input/nta2020.geojson")
-FOLD_RESULTS_PATH = Path("./data/models/fold_results.csv")
-BASELINE_COMP_PATH = Path("./data/models/holdout_baseline_comparison.csv")
-LOGREG_FOLD_PATH = Path("./data/models/logistic_regression_fold_results.csv")
-EVAL_SUMMARY_PATH = Path("./data/models/evaluation_summary.txt")
-LOGREG_SUMMARY_PATH = Path("./data/models/logistic_regression_summary.txt")
+from src.utils.config import GEOJSON_PATH as _GEO, MODELS_DIR
+
+GEOJSON_PATH = _GEO
+FOLD_RESULTS_PATH = MODELS_DIR / "fold_results.csv"
+BASELINE_COMP_PATH = MODELS_DIR / "holdout_baseline_comparison.csv"
+LOGREG_FOLD_PATH = MODELS_DIR / "logistic_regression_fold_results.csv"
+EVAL_SUMMARY_PATH = MODELS_DIR / "evaluation_summary.txt"
+LOGREG_SUMMARY_PATH = MODELS_DIR / "logistic_regression_summary.txt"
+BOROUGH_ERROR_PATH = MODELS_DIR / "holdout_error_by_borough.csv"
+SEASON_ERROR_PATH = MODELS_DIR / "holdout_error_by_season.csv"
 
 
 @st.cache_data(ttl=300)
@@ -340,6 +351,20 @@ def load_baseline_comparison():
 def load_logreg_folds():
     if LOGREG_FOLD_PATH.exists():
         return pd.read_csv(LOGREG_FOLD_PATH)
+    return pd.DataFrame()
+
+
+@st.cache_data
+def load_borough_error():
+    if BOROUGH_ERROR_PATH.exists():
+        return pd.read_csv(BOROUGH_ERROR_PATH)
+    return pd.DataFrame()
+
+
+@st.cache_data
+def load_season_error():
+    if SEASON_ERROR_PATH.exists():
+        return pd.read_csv(SEASON_ERROR_PATH)
     return pd.DataFrame()
 
 
@@ -530,6 +555,8 @@ modeling, predictions, feature_imp, complaints, pollen_monthly, neighborhoods = 
 fold_results = load_fold_results()
 baseline_comp = load_baseline_comparison()
 logreg_folds = load_logreg_folds()
+borough_error = load_borough_error()
+season_error = load_season_error()
 eval_summary = parse_eval_summary()
 geojson_data = load_geojson()
 
@@ -1125,6 +1152,82 @@ if not pred_data.empty and "pred" in pred_data.columns:
             <div class="eval-big-number">{within_10:.1%}</div>
             <div class="eval-label">of all predictions</div>
         </div>""", unsafe_allow_html=True)
+
+
+# ── Subgroup error analysis ────────────────────────────────────────────────
+
+if not borough_error.empty or not season_error.empty:
+    st.markdown("### Error Breakdown by Subgroup")
+    st.markdown("""
+    <div class="eval-section-intro">
+        How holdout error varies across boroughs and seasons — highlighting where
+        the model performs best and where it struggles.
+    </div>
+    """, unsafe_allow_html=True)
+
+    sub_c1, sub_c2 = st.columns(2)
+
+    if not borough_error.empty:
+        with sub_c1:
+            borough_order = borough_error.sort_values("mae")
+            fig_borough = go.Figure()
+            fig_borough.add_trace(go.Bar(
+                y=borough_order["borough"], x=borough_order["mae"],
+                orientation="h", marker_color="#C4501A", opacity=0.85,
+                text=[f"r={r:.3f}" for r in borough_order["pearson_r"]],
+                textposition="outside",
+            ))
+            fig_borough.update_layout(
+                title=dict(text="MAE by Borough (Holdout)", font=dict(family="Playfair Display", size=16)),
+                height=300, margin=dict(l=0, r=60, t=40, b=10),
+                plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+                font=dict(family="DM Sans", size=12, color="#5A5A5A"),
+                xaxis=dict(title="MAE (ED visits)", gridcolor="#F0EDE8"),
+                yaxis=dict(showgrid=False),
+            )
+            st.plotly_chart(fig_borough, use_container_width=True, config={"displayModeBar": False})
+
+            borough_table = borough_error.rename(columns={
+                "borough": "Borough", "mae": "MAE", "rmse": "RMSE",
+                "pearson_r": "Pearson r", "pct_ntas_within_15pct": "Within 15%",
+                "n_ntas": "NTAs",
+            })
+            borough_table["Within 15%"] = borough_table["Within 15%"].map("{:.1%}".format)
+            st.dataframe(
+                borough_table[["Borough", "MAE", "RMSE", "Pearson r", "Within 15%", "NTAs"]],
+                use_container_width=True, hide_index=True,
+            )
+
+    if not season_error.empty:
+        with sub_c2:
+            season_order = ["Spring", "Summer", "Fall"]
+            se = season_error.set_index("season").reindex(season_order).dropna(subset=["mae"]).reset_index()
+            fig_season = go.Figure()
+            fig_season.add_trace(go.Bar(
+                y=se["season"], x=se["mae"],
+                orientation="h", marker_color="#B8860B", opacity=0.85,
+                text=[f"r={r:.3f}" for r in se["pearson_r"]],
+                textposition="outside",
+            ))
+            fig_season.update_layout(
+                title=dict(text="MAE by Season (Holdout)", font=dict(family="Playfair Display", size=16)),
+                height=300, margin=dict(l=0, r=60, t=40, b=10),
+                plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+                font=dict(family="DM Sans", size=12, color="#5A5A5A"),
+                xaxis=dict(title="MAE (ED visits)", gridcolor="#F0EDE8"),
+                yaxis=dict(showgrid=False),
+            )
+            st.plotly_chart(fig_season, use_container_width=True, config={"displayModeBar": False})
+
+            season_table = se.rename(columns={
+                "season": "Season", "mae": "MAE", "rmse": "RMSE",
+                "pearson_r": "Pearson r", "pct_ntas_within_15pct": "Within 15%",
+            })
+            season_table["Within 15%"] = season_table["Within 15%"].map("{:.1%}".format)
+            st.dataframe(
+                season_table[["Season", "MAE", "RMSE", "Pearson r", "Within 15%"]],
+                use_container_width=True, hide_index=True,
+            )
 
 
 # ── Baseline comparison table ───────────────────────────────────────────────

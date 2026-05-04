@@ -21,21 +21,14 @@ import pandas as pd
 from pathlib import Path
 import xgboost as xgb
 
-from src.features.feature_engineering import FEATURE_COLS, TARGET, load_modeling_table
+from src.features.feature_engineering import FEATURE_COLS, TARGET, XGBOOST_PARAMS, load_modeling_table
+from src.utils.config import MODELS_DIR
 
-OUTPUT_DIR = Path("./data/models")
+OUTPUT_DIR = MODELS_DIR
 
 
 def train_final_model(df: pd.DataFrame) -> xgb.XGBRegressor:
-    model = xgb.XGBRegressor(
-        n_estimators=200,
-        max_depth=6,
-        learning_rate=0.1,
-        subsample=0.8,
-        colsample_bytree=0.8,
-        random_state=42,
-        verbosity=0,
-    )
+    model = xgb.XGBRegressor(**XGBOOST_PARAMS)
     model.fit(df[FEATURE_COLS], df[TARGET])
     return model
 
