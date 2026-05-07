@@ -7,7 +7,7 @@ Run: streamlit run src/dashboard/app.py
 
 import json
 import os
-
+from src.utils.config import GEOJSON_PATH as _GEO, MODELS_DIR
 import streamlit as st
 import pandas as pd
 import folium
@@ -295,18 +295,35 @@ if _PROJECT_ROOT not in sys.path:
 
 # ── Database connection ──────────────────────────────────────────────────────
 
-# Load .env securely from the true directory
 load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env")
+def get_db_params():
+    # Streamlit Cloud: đọc từ Secrets
+    try:
+        host = st.secrets["database"]["host"]
+        return dict(
+            dbname=st.secrets["database"]["dbname"],
+            user=st.secrets["database"]["user"],
+            password=st.secrets["database"]["password"],
+            host=host,
+            port=int(st.secrets["database"]["port"]),
+            sslmode="require",
+        )
+    except Exception:
+        pass
 
-DB_PARAMS = dict(
-    dbname=os.environ.get("DB_NAME", "pollen_pain"),
-    user=os.environ.get("DB_USER", "postgres"),
-    password=os.environ.get("DB_PASSWORD", ""),
-    host=os.environ.get("DB_HOST", "localhost"),
-    port=int(os.environ.get("DB_PORT", 5432)),
-    sslmode="require" if os.environ.get("DB_HOST", "localhost") != "localhost" else "prefer",
-)
-from src.utils.config import GEOJSON_PATH as _GEO, MODELS_DIR
+    # Local: đọc từ .env
+    host = os.environ.get("DB_HOST", "localhost")
+    return dict(
+        dbname=os.environ.get("DB_NAME", "pollen_pain"),
+        user=os.environ.get("DB_USER", "postgres"),
+        password=os.environ.get("DB_PASSWORD", ""),
+        host=host,
+        port=int(os.environ.get("DB_PORT", 5432)),
+        sslmode="require" if host != "localhost" else "prefer",
+    )
+
+DB_PARAMS = get_db_params()
+
 
 GEOJSON_PATH = _GEO
 FOLD_RESULTS_PATH = MODELS_DIR / "fold_results.csv"
