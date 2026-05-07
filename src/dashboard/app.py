@@ -7,6 +7,13 @@ Run: streamlit run src/dashboard/app.py
 
 import json
 import os
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 from src.utils.config import GEOJSON_PATH as _GEO, MODELS_DIR
 import streamlit as st
 import pandas as pd
@@ -14,7 +21,6 @@ import folium
 from streamlit_folium import st_folium
 import plotly.graph_objects as go
 import psycopg2
-from pathlib import Path
 from dotenv import load_dotenv
 
 # ── Page config ──────────────────────────────────────────────────────────────
